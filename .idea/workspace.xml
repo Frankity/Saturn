@@ -5,11 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fa3e667e-671f-4bf0-a6ff-e77b3cca4af3" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/ui/widgets/header_response.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ui/widgets/header_status.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui/widgets/query_panel.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/misc.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/custom.css" beforeDir="false" afterPath="$PROJECT_DIR$/custom.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/requests.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/requests.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/res/methods.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/methods.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/saturn.db" beforeDir="false" afterPath="$PROJECT_DIR$/saturn.db" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ui/main_window.py" beforeDir="false" afterPath="$PROJECT_DIR$/ui/main_window.py" afterDir="false" />
     </list>
@@ -45,6 +46,13 @@
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/res" />
+      <recent name="$PROJECT_DIR$/ui" />
+      <recent name="$PROJECT_DIR$/utils" />
+    </key>
+  </component>
   <component name="RunManager">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="Saturn" />
