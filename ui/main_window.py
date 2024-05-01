@@ -1,14 +1,26 @@
+import json
+
 import gi
+import urllib3
+import time
 
 from models.requests import Requests
 from res.methods import items
 from ui.widgets.header_item import HeaderItem
-from ui.widgets.request_window import RequestWindow
+from ui.widgets.header_response import HeaderResponse
+from ui.widgets.header_status import HeaderStatus
 
 gi.require_version('Gtk', '4.0')
 gi.require_version('GdkPixbuf', '2.0')
-from gi.repository import GdkPixbuf, Gtk, Gdk, Pango, Gio, GLib
+gi.require_version('GtkSource', '5')
 
+from gi.repository import GdkPixbuf, Gtk, Gdk, Pango, Gio, GLib, GtkSource
+
+row_selected = None
+json_response = None
+buffer = GtkSource.Buffer()
+header_response = HeaderResponse()
+app_settings = Gio.Settings.new(schema_id='xyz.frankity.saturn')
 
 class ProjectList(Gtk.Box):
     def __init__(self):
@@ -29,6 +41,10 @@ class ProjectList(Gtk.Box):
         self.append(self.listbox)
 
 
+def set_selected_row(row):
+    app_settings.set_int('selected-row', row.id)
+
+
 def show_modal(event):
     popover = Gtk.Popover()
 
@@ -40,7 +56,6 @@ def show_modal(event):
     url_widget = event.get_parent().get_last_child().get_prev_sibling()
 
     def store_item(event):
-        print("test")
         query = (Requests.insert(
             name=entry.get_text(),
             url=url_widget.get_text(),
@@ -158,23 +173,8 @@ class QueryPanel(Gtk.Box):
         self.container_box.append(self.options_query)
 
         def show_menu(widget, event):
-            # print(event)
-            # print(widget)
-            # if event == Gdk.EventType.BUTTON_PRESS:
-            # print(event.get_child().get_child().get_name())
-            print(":asdasd")
-            # menu_model = Gio.Menu()
-            #
-            # item1 = Gio.MenuItem.new("Item 1", "app.item1")
-            # menu_model.append_item(item1)
-            # item2 = Gio.MenuItem.new("Item 2", "app.item2")
-            # menu_model.append_item(item2)
-            #
-            # menu = Gtk.PopoverMenu.new_from_model(menu_model)
-            # menu.props.position = Gtk.PositionType.RIGHT
-            #
-            # menu.set_parent(event)
-            # menu.show()
+            set_selected_row(event)
+
 
         self.listbox.connect("row-selected", show_menu)
 
@@ -182,6 +182,7 @@ class QueryPanel(Gtk.Box):
 
         for element in requests:
             row = Gtk.ListBoxRow()
+            row.id = element.id
             row.set_name("rbox")
             hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=30)  # lista
             hbox.set_name("hbox")
@@ -208,7 +209,8 @@ class QueryPanel(Gtk.Box):
             label_subtitle.set_justify(Gtk.Justification.LEFT)
 
             label_type = Gtk.Label()
-            label_type.set_markup("<span color='#ffffff' size='medium'>   " + get_name_by_type(element.type) + "   </span>")
+            label_type.set_markup(
+                "<span color='#ffffff' size='medium'>   " + get_name_by_type(element.type) + "   </span>")
             label_type.set_name(get_type_color_label(element.type))
             label_type.set_xalign(2)
             label_type.set_margin_end(10)
@@ -241,15 +243,45 @@ def get_type_color_label(tpe):
     elif tpe == 4:
         return 'type-delete-label'
 
+
 class ResponsePanel(Gtk.Notebook):
     def __init__(self):
         super().__init__()
 
         label1 = Gtk.Label(label="Response")
-        self.append_page(Gtk.Label(label="Response Tab"), label1)
+        frame_child = Gtk.Frame()
+
+        sw = Gtk.ScrolledWindow()
+
+        view = GtkSource.View.new_with_buffer(buffer)
+
+        view.set_hexpand(True)
+        view.set_vexpand(True)
+        view.set_show_line_numbers(True)
+        view.set_editable(False)
+
+        language_manager = GtkSource.LanguageManager.new()
+        json_lang = language_manager.get_language("json")
+        buffer.set_language(json_lang)
+
+        sw.set_child(view)
+        frame_child.set_child(sw)
+
+        style_scheme_manager = GtkSource.StyleSchemeManager.get_default()
+        style_scheme = style_scheme_manager.get_scheme('Adwaita-dark')
+        if style_scheme:
+            buffer.set_style_scheme(style_scheme)
+
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+        button = Gtk.Button(label="Format")
+
+        box.append(button)
+        box.append(frame_child)
+
+        self.append_page(box, label1)
 
         label2 = Gtk.Label(label="Headers")
-        self.append_page(Gtk.Label(label="Headers Tab"), label2)
+        self.append_page(header_response, label2)
 
         label3 = Gtk.Label(label="Cookies")
         self.append_page(Gtk.Label(label="Cookies Tab"), label3)
@@ -263,39 +295,6 @@ def open_response(self, dialog, response):
     if response == Gtk.ResponseType.ACCEPT:
         file = dialog.get_file()
         filename = file.get_path()
-        print(filename)
-
-
-class StatusHeader(Gtk.Box):
-    def __init__(self):
-        super().__init__(orientation=Gtk.Orientation.HORIZONTAL, spacing=50)
-        self.set_margin_top(20)
-        self.set_margin_bottom(15)
-        self.set_margin_start(10)
-        label_status = Gtk.Label()
-        label_status.set_markup("<span weight='light' size='medium'>Status: </span><span weight='bold' "
-                                "color='#008800'>200 OK</span>")
-        label_size = Gtk.Label()
-        label_size.set_markup("<span weight='light' size='medium'>Size: </span><span weight='bold' "
-                              "color='#008800'>220 Bytes</span>")
-        label_time = Gtk.Label()
-        label_time.set_markup("<span weight='light' size='medium'>Time: </span><span weight='bold' "
-                              "color='#008800'>299 ms</span>")
-
-        box = Gtk.Box(spacing=6)
-        icon = Gtk.Image(icon_name="system-run-symbolic")
-        label = Gtk.Label(label="Run")
-        box.append(icon)
-        box.append(label)
-        button = Gtk.Button(child=box)
-        button.set_halign(Gtk.Align.END)
-        button.set_margin_end(10)
-        button.set_hexpand(True)  # trick to righth align
-
-        self.append(label_status)
-        self.append(label_size)
-        self.append(label_time)
-        self.append(button)
 
 
 class MyWindow(Gtk.ApplicationWindow):
@@ -319,7 +318,9 @@ class MyWindow(Gtk.ApplicationWindow):
         response_panel.set_hexpand(True)
         response_panel.set_vexpand(True)
 
-        response_column.append(StatusHeader())
+        self.header_status = HeaderStatus(self)
+
+        response_column.append(self.header_status)
         response_column.append(response_panel)
         response_column.set_margin_start(5)
         response_column.set_margin_end(5)
@@ -372,6 +373,32 @@ class MyWindow(Gtk.ApplicationWindow):
         action.connect("activate", self.show_about)
         self.add_action(action)  # Here the action is being added to the window, but you could add it to the
         menu.append("About", "win.about")
+
+    def make_request(self, event):
+        request = (Requests.select(Requests.type, Requests.url)
+                   .where(Requests.id == app_settings.get_int('selected-row')).first())
+
+        http = urllib3.PoolManager()
+
+        start_time = time.time()
+        resp = http.request(get_name_by_type(request.type), request.url)
+        end_time = time.time()
+        elapsed = end_time - start_time
+        resp.elapsed = elapsed
+
+        parsed = json.loads(resp.data)
+        formatted_json = json.dumps(parsed, indent=8, sort_keys=True)
+
+        liststore = Gtk.ListStore(str, str)
+
+        for header in resp.headers:
+            liststore.append([header, resp.headers[header]])
+
+        header_response.set_list_store(liststore)
+
+        self.header_status.update_data(resp)
+
+        buffer.set_text(formatted_json)
 
     def show_about(self, action, param):
         self.about = Gtk.AboutDialog()

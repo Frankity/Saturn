@@ -5,27 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fa3e667e-671f-4bf0-a6ff-e77b3cca4af3" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/Saturn.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/custom.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/collection.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/requests.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/res/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/res/methods.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ui/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ui/main_window.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ui/widgets/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ui/widgets/custom.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ui/widgets/header_item.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ui/widgets/project_list.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ui/widgets/request_window.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui/widgets/header_response.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui/widgets/header_status.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/custom.css" beforeDir="false" afterPath="$PROJECT_DIR$/custom.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/saturn.db" beforeDir="false" afterPath="$PROJECT_DIR$/saturn.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ui/main_window.py" beforeDir="false" afterPath="$PROJECT_DIR$/ui/main_window.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
