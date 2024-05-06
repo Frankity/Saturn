@@ -118,22 +118,19 @@ class ResponsePanel(Gtk.Notebook):
         super().__init__()
 
         label1 = Gtk.Label(label="Response")
-        frame_child = Gtk.Frame()
 
         sw = Gtk.ScrolledWindow()
+
+        sw.set_margin_top(5)
+        sw.set_margin_bottom(5)
+        sw.set_margin_start(5)
+        sw.set_margin_end(5)
 
         source_view = SourceView(buffer, False)
 
         sw.set_child(source_view)
-        frame_child.set_child(sw)
 
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
-        button = Gtk.Button(label="Format")
-
-        box.append(button)
-        box.append(frame_child)
-
-        self.append_page(box, label1)
+        self.append_page(sw, label1)
 
         label2 = Gtk.Label(label="Headers")
         self.append_page(header_response, label2)
@@ -156,6 +153,8 @@ class MyWindow(Gtk.ApplicationWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.set_default_size(1600, 1024)
+
+        app_settings.connect("changed", query_panel.on_setting_changed)
 
         self.set_title("Saturn")
         main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)

@@ -1,5 +1,8 @@
+import json
+
 import gi
 
+from models.body import Body
 from ui.widgets.source_view import SourceView
 
 gi.require_version('Gtk', '4.0')
@@ -57,7 +60,13 @@ class QueryPanel(Gtk.Box):
         buffer = GtkSource.Buffer()
 
         sw = Gtk.ScrolledWindow()
+        sw.set_margin_top(5)
+        sw.set_margin_bottom(5)
+        sw.set_margin_start(5)
+        sw.set_margin_end(5)
+
         self.sv = SourceView(buffer, True)
+
         sw.set_child(self.sv)
 
         self.options_query.append_page(self.scrolled_window, Gtk.Label(label="Query"))
@@ -74,11 +83,25 @@ class QueryPanel(Gtk.Box):
 
         self.listbox.connect("row-selected", show_menu)
 
-        self.add_request_to_list()
+        self.add_request_to_list()q
 
         def set_selected_row(row):
             app_settings = Gio.Settings.new(schema_id='xyz.frankity.saturn')
             app_settings.set_int('selected-row', row.id)
+
+    def on_setting_changed(self, settings, key):
+        try:
+            value = settings.get_int(key)
+            body_data = (Body
+                         .select(Body.body)
+                         .where(Body.request == int(value))
+                         .first())
+            parsed_json = json.loads(body_data.body if body_data is not None else "{}")
+            formatted_json = json.dumps(parsed_json, indent=8)
+            self.sv.get_buffer().set_text(formatted_json)
+
+        except Exception as e:
+            print(e)
 
     def clear_list(self):
         request_items = Requests.select().count()
@@ -146,7 +169,5 @@ class QueryPanel(Gtk.Box):
             self.listbox.append(row)
 
         self.append(self.container_box)
-
-
 
     #def refresh_query_panel(self):
