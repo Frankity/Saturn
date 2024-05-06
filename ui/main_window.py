@@ -1,4 +1,5 @@
 import json
+import re
 
 import gi
 import urllib3
@@ -10,6 +11,7 @@ from models.requests import Requests, RequestModel
 from ui.widgets.query_panel import QueryPanel
 from ui.widgets.header_response import HeaderResponse
 from ui.widgets.header_status import HeaderStatus
+from ui.widgets.source_view import SourceView
 from utils.methods import items
 from utils.misc import get_type_by_name, get_name_by_type
 
@@ -21,6 +23,7 @@ from gi.repository import Gtk, Pango, Gio, GLib, GtkSource, GdkPixbuf, Gdk
 
 row_selected = None
 json_response = None
+
 buffer = GtkSource.Buffer()
 header_response = HeaderResponse()
 query_panel = QueryPanel()
@@ -119,24 +122,10 @@ class ResponsePanel(Gtk.Notebook):
 
         sw = Gtk.ScrolledWindow()
 
-        view = GtkSource.View.new_with_buffer(buffer)
+        source_view = SourceView(buffer, False)
 
-        view.set_hexpand(True)
-        view.set_vexpand(True)
-        view.set_show_line_numbers(True)
-        view.set_editable(False)
-
-        language_manager = GtkSource.LanguageManager.new()
-        json_lang = language_manager.get_language("json")
-        buffer.set_language(json_lang)
-
-        sw.set_child(view)
+        sw.set_child(source_view)
         frame_child.set_child(sw)
-
-        style_scheme_manager = GtkSource.StyleSchemeManager.get_default()
-        style_scheme = style_scheme_manager.get_scheme('Adwaita-dark')
-        if style_scheme:
-            buffer.set_style_scheme(style_scheme)
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
         button = Gtk.Button(label="Format")
@@ -179,13 +168,14 @@ class MyWindow(Gtk.ApplicationWindow):
         self.header_item = None
 
         self.method_url_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
-
+        self.method_url_box.set_margin_start(5)
+        self.method_url_box.set_margin_end(5)
         self.entry_url = Gtk.Entry()
         self.entry_url.set_name("entry_url")
         self.entry_url.set_placeholder_text('https://...')
         self.entry_url.set_hexpand(True)
         self.entry_url.set_margin_top(10)
-        self.entry_url.set_margin_bottom(10)
+        self.entry_url.set_margin_bottom(0)
 
         self.box = Gtk.Box()
         self.icon = Gtk.Image(icon_name="list-add-symbolic")
@@ -193,19 +183,20 @@ class MyWindow(Gtk.ApplicationWindow):
         self.box.set_tooltip_text('Add request')
         self.add_button = Gtk.Button(child=self.box)
         self.add_button.set_margin_top(10)
-        self.add_button.set_margin_bottom(10)
+        self.add_button.set_margin_bottom(0)
         self.add_button.set_name("add-button")
         self.add_button.connect("clicked", show_modal)
 
         self.dropdown = Gtk.DropDown()
         self.dropdown.set_margin_top(10)
-        self.dropdown.set_margin_bottom(10)
+        self.dropdown.set_margin_bottom(0)
 
         strings = Gtk.StringList()
         self.dropdown.props.model = strings
 
         for item in [item["name"] for item in items]:
             strings.append(item)
+
         self.method_url_box.append(self.dropdown)
         self.method_url_box.append(self.entry_url)
         self.method_url_box.append(self.add_button)
@@ -278,30 +269,64 @@ class MyWindow(Gtk.ApplicationWindow):
         menu.append("About", "win.about")
 
     def make_request(self, event):
-        request = (Requests.select(Requests.type, Requests.url)
-                   .where(Requests.id == app_settings.get_int('selected-row')).first())
-
+        request = (Requests
+                   .select(Requests.type, Requests.url)
+                   .where(Requests.id == app_settings.get_int('selected-row'))
+                   .first())
         http = urllib3.PoolManager()
-
-        start_time = time.time()
-        resp = http.request(get_name_by_type(request.type), request.url)
-        end_time = time.time()
-        elapsed = end_time - start_time
-        resp.elapsed = elapsed
-
-        parsed = json.loads(resp.data)
-        formatted_json = json.dumps(parsed, indent=8, sort_keys=True)
-
         liststore = Gtk.ListStore(str, str)
+        method = get_name_by_type(request.type)
 
-        for header in resp.headers:
-            liststore.append([header, resp.headers[header]])
+        start_iter = query_panel.sv.get_buffer().get_start_iter()
+        end_iter = query_panel.sv.get_buffer().get_end_iter()
+        body = query_panel.sv.get_buffer().get_text(start_iter, end_iter, True)
 
-        header_response.set_list_store(liststore)
+        try:
+            start_time = time.time()
+            resp = http.request(
+                method=get_name_by_type(request.type),
+                url=request.url,
+                body=body if method in ["POST", "PUT", "PATCH"] else None,
+                headers={'Content-Type': 'application/json'},
+            )
 
-        self.header_status.update_data(resp)
+            end_time = time.time()
 
-        buffer.set_text(formatted_json)
+            elapsed = end_time - start_time
+            resp.elapsed = elapsed
+
+            parsed = json.loads(resp.data)
+
+            for header in resp.headers:
+                liststore.append([header, resp.headers[header]])
+
+            self.header_status.update_data(resp)
+
+            formatted_json = json.dumps(parsed, indent=8, sort_keys=True)
+
+            header_response.set_list_store(liststore)
+            buffer.set_text(formatted_json)
+
+        except urllib3.exceptions.HTTPWarning as e:
+            # Handle urllib3 exceptions here
+            print("URLError:", e)
+            buffer.set_text(str(e.args), len(str(e.args)))
+            # Set header even in case of error
+
+        except urllib3.exceptions.HTTPError as e:
+            print("HTTPError:", e)
+            buffer.set_text(str(e.args), len(str(e.args)))
+            # Set header even in case of error
+
+        except Exception as e:
+            # Handle other exceptions here
+            print("An unexpected error occurred:", e)
+            buffer.set_text(str(e.args), len(str(e.args)))
+            # Set header even in case of error
+
+        finally:
+            # Any cleanup or final actions can go here
+            pass
 
     def show_about(self, action, param):
         self.about = Gtk.AboutDialog()

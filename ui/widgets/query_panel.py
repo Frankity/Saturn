@@ -1,8 +1,11 @@
 import gi
 
-gi.require_version('Gtk', '4.0')
+from ui.widgets.source_view import SourceView
 
-from gi.repository import Gtk, Pango, Gio
+gi.require_version('Gtk', '4.0')
+gi.require_version('GtkSource', '5')
+
+from gi.repository import Gtk, Pango, Gio, GtkSource
 
 from models.requests import Requests
 from ui.widgets.header_item import HeaderItem
@@ -26,7 +29,7 @@ class QueryPanel(Gtk.Box):
         self.header_headers_container.append(self.label_header_description)
 
         self.list_box_headers = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
-        self.list_box_headers.set_margin_top(5)
+        self.list_box_headers.set_margin_top(0)
         self.list_box_headers.set_hexpand(True)
 
         self.box = Gtk.Box()
@@ -51,11 +54,18 @@ class QueryPanel(Gtk.Box):
 
         self.scrolled_window.set_child(self.listbox)
 
+        buffer = GtkSource.Buffer()
+
+        sw = Gtk.ScrolledWindow()
+        self.sv = SourceView(buffer, True)
+        sw.set_child(self.sv)
+
         self.options_query.append_page(self.scrolled_window, Gtk.Label(label="Query"))
+        self.options_query.append_page(sw, Gtk.Label(label="Body"))
+        self.options_query.append_page(Gtk.Label(label="Params"), Gtk.Label(label="Params"))
         self.options_query.append_page(self.list_box_headers, Gtk.Label(label="Headers"))
         self.options_query.append_page(Gtk.Label(label="Auth"), Gtk.Label(label="Auth"))
-        self.options_query.append_page(Gtk.Label(label="Body"), Gtk.Label(label="Body"))
-        self.options_query.append_page(Gtk.Label(label="Events"), Gtk.Label(label="Event"))
+        self.options_query.append_page(Gtk.Label(label="Events"), Gtk.Label(label="Events"))
 
         self.container_box.append(self.options_query)
 
