@@ -9,6 +9,12 @@ Saturn is a lightweight and native REST client application designed for Linux en
 - **PyGTK with Gtk4:** Leveraging the power of PyGTK with Gtk4, Saturn delivers a responsive and efficient application framework.
 - **GtkSourceView 5 Integration:** Saturn utilizes GtkSourceView 5 for enhanced source code editing capabilities, providing a seamless experience for developers.
 
+![Saturn Interface](res/scr_3.png)
+*Saturn Interface*
+
+![Saturn GtkSourceView](res/scr_1.png)
+*Saturn with GtkSourceView*
+
 ## Installation
 
 ### Requirements
@@ -21,7 +27,7 @@ Saturn is a lightweight and native REST client application designed for Linux en
 1. Clone the repository: `git clone https://github.com/Frankity/Saturn.git`
 2. Navigate to the project directory: `cd Saturn`
 3. Install dependencies: `pip install -r requirements.txt`
-4. Run Saturn: `python main.py`
+4. Run Saturn: `python saturn.py`
 
 ## Usage
 1. Launch Saturn.
