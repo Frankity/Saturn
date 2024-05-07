@@ -37,10 +37,13 @@ Saturn is a lightweight and native REST client application designed for Linux en
 5. View the response in the designated area.
 
 ## Contributing
-Contributions are welcome! If you encounter any bugs or have suggestions for improvements, feel free to open an issue or submit a pull request on the [GitHub repository](https://github.com/your_username/Saturn).
+Contributions are welcome! If you encounter any bugs or have suggestions for improvements, feel free to open an issue or submit a pull request on the [GitHub repository](https://github.com/Frankity/Saturn.git).
+
+## Note
+This software is under casual development mode, so do not expect updates daily or weekly. 
 
 ## License
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [MIT License](https://opensource.org/license/MIT).
 
 ## Acknowledgements
 Special thanks to the PyGTK, Gtk4, and GtkSourceView 5 communities for their invaluable contributions to the development of Saturn.
