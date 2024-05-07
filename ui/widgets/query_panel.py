@@ -3,6 +3,7 @@ import json
 import gi
 
 from models.body import Body
+from ui.widgets.query_item import QueryItem
 from ui.widgets.source_view import SourceView
 
 gi.require_version('Gtk', '4.0')
@@ -83,7 +84,7 @@ class QueryPanel(Gtk.Box):
 
         self.listbox.connect("row-selected", show_menu)
 
-        self.add_request_to_list()q
+        self.add_request_to_list()
 
         def set_selected_row(row):
             app_settings = Gio.Settings.new(schema_id='xyz.frankity.saturn')
@@ -112,62 +113,11 @@ class QueryPanel(Gtk.Box):
         self.add_request_to_list()
 
     def add_request_to_list(self):
-
+        self.listbox.bind_model()
         requests = Requests.select()
-        font_desc = Pango.FontDescription("sans 12")
 
-        for element in requests:
-            row = Gtk.ListBoxRow()
-            row.id = element.id
-            row.set_name("rbox")
-            hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=30)  # lista
-            hbox.set_name("hbox")
-            vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)  # filas
-            hbox.set_name("vbox")
-            item_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
-            hbox.set_name("ibox")
-            vbox.set_hexpand(True)
-
-            label_title = Gtk.Label()
-            label_title.set_markup(
-                "<span size=\"" + str(int(font_desc.get_size())) + "\"><b>" + element.name + "</b></span>")
-            label_title.set_justify(Gtk.Justification.LEFT)
-            label_title.set_margin_start(10)
-            label_title.set_margin_top(10)
-            label_title.set_xalign(0)
-
-            label_subtitle = Gtk.Label()
-            label_subtitle.set_markup(
-                "<span weight='light' color='#dddddd' size='medium'>" + element.url + "</span>")
-            label_subtitle.set_margin_start(10)
-            label_subtitle.set_margin_bottom(10)
-            label_subtitle.set_xalign(0)
-            label_subtitle.set_justify(Gtk.Justification.LEFT)
-
-            label_type = Gtk.Label()
-            label_type.set_markup(
-                "<span color='#ffffff' size='medium'>   " + get_name_by_type(element.type) + "   </span>")
-            label_type.set_name(get_type_color_label(element.type))
-            label_type.set_xalign(2)
-            label_type.set_margin_end(10)
-            label_type.set_margin_top(17)
-            label_type.set_margin_bottom(17)
-            label_type.set_hexpand(False)
-            label_type.set_vexpand(False)
-
-            item_box.append(label_title)
-            item_box.append(label_subtitle)
-
-            vbox.append(item_box)
-            hbox.append(vbox)
-            item_box.set_halign(Gtk.Align.START)
-
-            hbox.append(label_type)
-
-            row.set_child(hbox)
-
-            self.listbox.append(row)
+        for request in requests:
+            item_box = QueryItem(request)
+            self.listbox.append(item_box)
 
         self.append(self.container_box)
-
-    #def refresh_query_panel(self):

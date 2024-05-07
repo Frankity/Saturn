@@ -1,5 +1,4 @@
 import json
-import re
 
 import gi
 import urllib3
@@ -8,6 +7,7 @@ import time
 from pydantic import ValidationError
 
 from models.requests import Requests, RequestModel
+from ui.widgets.query_item import QueryItem
 from ui.widgets.query_panel import QueryPanel
 from ui.widgets.header_response import HeaderResponse
 from ui.widgets.header_status import HeaderStatus
@@ -97,11 +97,18 @@ def show_modal(event):
             if cursor is not None:
                 url_widget.set_text("")
                 popover.hide()
+                request = Requests()
+                request.id = cursor
+                request.name = valida_data.get("name")
+                request.url = valida_data.get("url")
+                request.type = valida_data.get("type")
+
+                query_panel.listbox.append(QueryItem(request))
+
         except ValidationError as e:
             data = {"title": "Atention", "info": e.json()}
             show_overlay(data)
 
-        query_panel.clear_list()
 
     button = Gtk.Button(label='Save')
     button.connect("clicked", store_item)

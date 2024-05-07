@@ -13,6 +13,7 @@ class Requests(Model):
     class Meta:
         database = db
 
+
 class RequestModel(BaseModel):
     name: str = Field(..., min_length=3)
     url: HttpUrl
