@@ -160,16 +160,15 @@ def open_response(self, dialog, response):
         filename = file.get_path()
 
 
-class MyWindow(Gtk.ApplicationWindow):
+class MyWindow(Gtk.Window):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.set_default_size(1600, 1024)
 
-        #database.connect()
+        # set app name
+        GLib.set_application_name("Saturn")
 
         app_settings.connect("changed", query_panel.on_setting_changed)
-
-        self.set_title("Saturn")
 
         main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         container_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -238,51 +237,29 @@ class MyWindow(Gtk.ApplicationWindow):
         main_panel.pack1(main_box)
         main_panel.pack2(response_column)
 
-        self.header = Gtk.HeaderBar()
+        hb = Gtk.HeaderBar()
+        hb.set_show_close_button(True)
+        hb.props.title = "Saturn"
+        self.set_titlebar(hb)
 
-        self.set_titlebar(self.header)
-        self.open_button = Gtk.Button(label="Open")
-        self.header.pack_start(self.open_button)
+        self.popover = Gtk.Popover()
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        vbox.pack_start(Gtk.ModelButton(label="Import Collection"), False, True, 10)
+        vbox.pack_start(Gtk.ModelButton(label="Export Collection"), False, True, 10)
+        vbox.show_all()
+        self.popover.add(vbox)
+        self.popover.set_position(Gtk.PositionType.BOTTOM)
 
-        #self.open_button.set_icon_name("document-open-symbolic")
+        self.open_button = Gtk.MenuButton(popover=self.popover)
+        self.open_button.set_tooltip_text("Open Something?")
+        hb.pack_start(self.open_button)
+
+        icon = Gio.ThemedIcon(name="document-open-symbolic")
+        image = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
+        self.open_button.add(image)
 
         self.open_dialog = Gtk.FileChooserNative.new(title="Choose a file",
                                                      parent=self, action=Gtk.FileChooserAction.OPEN)
-
-        self.open_dialog.connect("response", open_response)
-        self.open_button.connect("clicked", show_open_dialog)
-
-        # Create a new "Action"
-        action = Gio.SimpleAction.new("something", None)
-        # action.connect("activate", self.print_something)
-        self.add_action(action)  # Here the action is being added to the window, but you could add it to the
-        # application or an "ActionGroup"
-
-        # Create a new menu, containing that action
-        # menu = Gio.Menu.new()
-        # menu.add("Do Something", "win.something")  # Or you would do app.grape if you had attached the
-        # # action to the application
-
-        # Create a popover
-        # self.popover = Gtk.PopoverMenu()  # Create a new popover menu
-        # self.popover.set_menu_model(menu)
-        #
-        # # Create a menu button
-        # self.hamburger = Gtk.MenuButton()
-        # self.hamburger.set_popover(self.popover)
-        # self.hamburger.set_icon_name("open-menu-symbolic")  # Give it a nice icon
-        #
-        # # Add menu button to the header bar
-        # self.header.pack_start(self.hamburger)
-
-        # set app name
-        GLib.set_application_name("Saturn")
-
-        # Add an about dialog
-        action = Gio.SimpleAction.new("about", None)
-        action.connect("activate", self.show_about)
-        self.add_action(action)  # Here the action is being added to the window, but you could add it to the
-        #menu.add("About", "win.about")
 
     def make_request(self, event):
         request = (Requests

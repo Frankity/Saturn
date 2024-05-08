@@ -35,7 +35,7 @@ class QueryItem(Gtk.ListBoxRow):
 
         self.label_subtitle = Gtk.Label()
         self.label_subtitle.set_markup(
-            "<span weight='light' color='#dddddd' size='medium'>" + request.url + "</span>")
+            "<span weight='light' size='medium'>" + request.url + "</span>")
         self.label_subtitle.set_margin_start(10)
         self.label_subtitle.set_margin_bottom(10)
         self.label_subtitle.set_xalign(0)
