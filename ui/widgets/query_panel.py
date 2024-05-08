@@ -83,7 +83,7 @@ class QueryPanel(Gtk.Box):
         self.add_request_to_list()
 
         def set_selected_row(row):
-            self.get_root().set_title('Saturn - (env_test)')
+
             app_settings = Gio.Settings.new(schema_id='xyz.frankity.saturn')
             app_settings.set_int('selected-row', row.id)
 
@@ -115,7 +115,7 @@ class QueryPanel(Gtk.Box):
         try:
             for request in requests:
                 item_box = QueryItem(request)
-                self.listbox.append(item_box)
+                self.listbox.add(item_box)
         except Exception as e:
             print(e)
             create_needed_tables()

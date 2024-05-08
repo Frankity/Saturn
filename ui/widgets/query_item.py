@@ -52,13 +52,13 @@ class QueryItem(Gtk.ListBoxRow):
         self.label_type.set_hexpand(False)
         self.label_type.set_vexpand(False)
 
-        self.item_box.append(self.label_title)
-        self.item_box.append(self.label_subtitle)
+        self.item_box.add(self.label_title)
+        self.item_box.add(self.label_subtitle)
 
-        self.vbox.append(self.item_box)
-        self.hbox.append(self.vbox)
+        self.vbox.add(self.item_box)
+        self.hbox.add(self.vbox)
         self.item_box.set_halign(Gtk.Align.START)
 
-        self.hbox.append(self.label_type)
+        self.hbox.add(self.label_type)
 
-        self.set_child(self.hbox)
+        self.add(self.hbox)

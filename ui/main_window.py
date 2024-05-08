@@ -118,14 +118,13 @@ def show_modal(event):
             data = {"title": "Atention", "info": e.json()}
             show_overlay(data)
 
-
     button = Gtk.Button(label='Save')
     button.connect("clicked", store_item)
     popover_container.add(entry)
     popover_container.add(button)
     popover.add(popover_container)
 
-#    popover.set_parent(event.get_root())
+    #event.set_popover(popover)
 
     popover.show()
 
@@ -144,16 +143,11 @@ class ResponsePanel(Gtk.Notebook):
         sw.set_margin_end(5)
 
         source_view = SourceView(buffer, False)
-
         sw.add(source_view)
 
         self.append_page(sw, label1)
-
-        label2 = Gtk.Label(label="Headers")
-        self.append_page(header_response, label2)
-
-        label3 = Gtk.Label(label="Cookies")
-        self.append_page(Gtk.Label(label="Cookies Tab"), label3)
+        self.append_page(header_response, Gtk.Label(label="Headers"))
+        self.append_page(Gtk.Label(label="Cookies Tab"), Gtk.Label(label="Cookies"))
 
 
 def show_open_dialog(self, button):
@@ -176,6 +170,7 @@ class MyWindow(Gtk.ApplicationWindow):
         app_settings.connect("changed", query_panel.on_setting_changed)
 
         self.set_title("Saturn")
+
         main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         container_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         main_panel = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
@@ -213,6 +208,7 @@ class MyWindow(Gtk.ApplicationWindow):
         renderer_text = Gtk.CellRendererText()
         self.dropdown.pack_start(renderer_text, True)
         self.dropdown.add_attribute(renderer_text, "text", 0)
+        self.dropdown.set_active(0)
 
         self.dropdown.set_margin_top(10)
         self.dropdown.set_margin_bottom(0)
@@ -318,7 +314,7 @@ class MyWindow(Gtk.ApplicationWindow):
             parsed = json.loads(resp.data)
 
             for header in resp.headers:
-                liststore.add([header, resp.headers[header]])
+                liststore.append([header, resp.headers[header]])
 
             self.header_status.update_data(resp)
 
