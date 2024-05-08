@@ -2,16 +2,15 @@ import json
 
 import gi
 
-from models.body import Body
 from ui.widgets.query_item import QueryItem
 from ui.widgets.source_view import SourceView
+from utils.database import Body, Requests, create_needed_tables
 
 gi.require_version('Gtk', '4.0')
 gi.require_version('GtkSource', '5')
 
 from gi.repository import Gtk, Pango, Gio, GtkSource
 
-from models.requests import Requests
 from ui.widgets.header_item import HeaderItem
 from utils.methods import items
 from utils.misc import get_name_by_type, get_type_color_label
@@ -116,9 +115,12 @@ class QueryPanel(Gtk.Box):
     def add_request_to_list(self):
         self.listbox.bind_model()
         requests = Requests.select()
-
-        for request in requests:
-            item_box = QueryItem(request)
-            self.listbox.append(item_box)
+        try:
+            for request in requests:
+                item_box = QueryItem(request)
+                self.listbox.append(item_box)
+        except Exception as e:
+            print(e)
+            create_needed_tables()
 
         self.append(self.container_box)

@@ -4,9 +4,10 @@ import gi
 import urllib3
 import time
 
+from utils.database import database, create_needed_tables, RequestModel, Requests
 from pydantic import ValidationError
 
-from models.requests import Requests, RequestModel
+
 from ui.widgets.query_item import QueryItem
 from ui.widgets.query_panel import QueryPanel
 from ui.widgets.header_response import HeaderResponse
@@ -160,6 +161,8 @@ class MyWindow(Gtk.ApplicationWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.set_default_size(1600, 1024)
+
+        #database.connect()
 
         app_settings.connect("changed", query_panel.on_setting_changed)
 

@@ -1,10 +1,6 @@
 import sys
 import gi
-from peewee import SqliteDatabase
 
-from models.body import Body
-from models.collection import Collection
-from models.requests import Requests
 from ui.main_window import MyWindow
 
 gi.require_version('Gtk', '4.0')
@@ -16,10 +12,9 @@ class MyApp(Adw.Application):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.connect('activate', self.on_activate)
-        db = SqliteDatabase('saturn.db')
-        db.connect()
-        db.create_tables([Collection, Requests, Body])
+
     def on_activate(self, app):
+
         style_provider = Gtk.CssProvider()
         style_provider.load_from_path("custom.css")
 
