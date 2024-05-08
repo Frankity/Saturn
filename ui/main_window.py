@@ -16,9 +16,9 @@ from ui.widgets.source_view import SourceView
 from utils.methods import items
 from utils.misc import get_type_by_name, get_name_by_type
 
-gi.require_version('Gtk', '4.0')
+gi.require_version('Gtk', '3.0')
 gi.require_version('GdkPixbuf', '2.0')
-gi.require_version('GtkSource', '5')
+gi.require_version('GtkSource', '4')
 
 from gi.repository import Gtk, Pango, Gio, GLib, GtkSource, GdkPixbuf, Gdk
 
@@ -42,12 +42,12 @@ class ProjectList(Gtk.Box):
             hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=50)
             label = Gtk.Label(label="Projeect " + str(i))
             icon = Gtk.Image.new_from_icon_name("avatar-default")
-            hbox.append(icon)
-            hbox.append(label)
+            hbox.add(icon)
+            hbox.add(label)
             row.set_child(hbox)
-            self.listbox.append(row)
+            self.listbox.add(row)
 
-        self.append(self.listbox)
+        self.add(self.listbox)
 
 
 def show_overlay(data):
@@ -59,14 +59,14 @@ def show_overlay(data):
     content_box_dialog.set_margin_end(10)
     content_box_dialog.set_margin_bottom(20)
     for d in json.loads(data['info']):
-        content_box_dialog.append(Gtk.Label(label=d['msg']))
+        content_box_dialog.add(Gtk.Label(label=d['msg']))
 
     button = Gtk.Button(label='OK')
     button.set_margin_start(30)
     button.set_margin_end(30)
     button.set_margin_top(20)
     button.connect('clicked', lambda bt: dialog.close())
-    content_box_dialog.append(button)
+    content_box_dialog.add(button)
     dialog.set_child(content_box_dialog)
     dialog.set_modal(True)
     dialog.show()
@@ -79,8 +79,16 @@ def show_modal(event):
     entry = Gtk.Entry()
     entry.set_placeholder_text('Request name')
 
-    method = event.get_parent().get_first_child().props.selected_item.props.string
-    url_widget = event.get_parent().get_last_child().get_prev_sibling()
+    combo_box = event.get_parent().get_children()[0]
+    entry_url = event.get_parent().get_children()[1]
+
+    active = combo_box.get_active()
+    selected_text = None
+    if active != -1:
+        selected_text = combo_box.get_model()[active][0]
+
+    method = selected_text
+    url_widget = entry_url
 
     def store_item(event):
 
@@ -104,7 +112,7 @@ def show_modal(event):
                 request.url = valida_data.get("url")
                 request.type = valida_data.get("type")
 
-                query_panel.listbox.append(QueryItem(request))
+                query_panel.listbox.add(QueryItem(request))
 
         except ValidationError as e:
             data = {"title": "Atention", "info": e.json()}
@@ -113,10 +121,11 @@ def show_modal(event):
 
     button = Gtk.Button(label='Save')
     button.connect("clicked", store_item)
-    popover_container.append(entry)
-    popover_container.append(button)
-    popover.set_child(popover_container)
-    popover.set_parent(event)
+    popover_container.add(entry)
+    popover_container.add(button)
+    popover.add(popover_container)
+
+#    popover.set_parent(event.get_root())
 
     popover.show()
 
@@ -136,7 +145,7 @@ class ResponsePanel(Gtk.Notebook):
 
         source_view = SourceView(buffer, False)
 
-        sw.set_child(source_view)
+        sw.add(source_view)
 
         self.append_page(sw, label1)
 
@@ -172,7 +181,7 @@ class MyWindow(Gtk.ApplicationWindow):
         main_panel = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
         response_column = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         main_panel.set_margin_bottom(5)
-        self.set_child(main_panel)
+        self.add(main_panel)
 
         self.header_item = None
 
@@ -188,7 +197,7 @@ class MyWindow(Gtk.ApplicationWindow):
 
         self.box = Gtk.Box()
         self.icon = Gtk.Image(icon_name="list-add-symbolic")
-        self.box.append(self.icon)
+        self.box.add(self.icon)
         self.box.set_tooltip_text('Add request')
         self.add_button = Gtk.Button(child=self.box)
         self.add_button.set_margin_top(10)
@@ -196,26 +205,28 @@ class MyWindow(Gtk.ApplicationWindow):
         self.add_button.set_name("add-button")
         self.add_button.connect("clicked", show_modal)
 
-        self.dropdown = Gtk.DropDown()
+        strings = Gtk.ListStore(str)
+        for item in [item["name"] for item in items]:
+            strings.append([item])
+
+        self.dropdown = Gtk.ComboBox.new_with_model(model=strings)
+        renderer_text = Gtk.CellRendererText()
+        self.dropdown.pack_start(renderer_text, True)
+        self.dropdown.add_attribute(renderer_text, "text", 0)
+
         self.dropdown.set_margin_top(10)
         self.dropdown.set_margin_bottom(0)
 
-        strings = Gtk.StringList()
-        self.dropdown.props.model = strings
-
-        for item in [item["name"] for item in items]:
-            strings.append(item)
-
-        self.method_url_box.append(self.dropdown)
-        self.method_url_box.append(self.entry_url)
-        self.method_url_box.append(self.add_button)
-        container_box.append(self.method_url_box)
+        self.method_url_box.add(self.dropdown)
+        self.method_url_box.add(self.entry_url)
+        self.method_url_box.add(self.add_button)
+        container_box.add(self.method_url_box)
 
         query_panel.set_margin_start(5)
         query_panel.set_margin_end(5)
 
-        main_box.append(container_box)
-        main_box.append(query_panel)
+        main_box.add(container_box)
+        main_box.add(query_panel)
 
         response_panel = ResponsePanel()
         response_panel.set_hexpand(True)
@@ -223,13 +234,13 @@ class MyWindow(Gtk.ApplicationWindow):
 
         self.header_status = HeaderStatus(self)
 
-        response_column.append(self.header_status)
-        response_column.append(response_panel)
+        response_column.add(self.header_status)
+        response_column.add(response_panel)
         response_column.set_margin_start(5)
         response_column.set_margin_end(5)
 
-        main_panel.set_start_child(main_box)
-        main_panel.set_end_child(response_column)
+        main_panel.pack1(main_box)
+        main_panel.pack2(response_column)
 
         self.header = Gtk.HeaderBar()
 
@@ -237,7 +248,7 @@ class MyWindow(Gtk.ApplicationWindow):
         self.open_button = Gtk.Button(label="Open")
         self.header.pack_start(self.open_button)
 
-        self.open_button.set_icon_name("document-open-symbolic")
+        #self.open_button.set_icon_name("document-open-symbolic")
 
         self.open_dialog = Gtk.FileChooserNative.new(title="Choose a file",
                                                      parent=self, action=Gtk.FileChooserAction.OPEN)
@@ -252,21 +263,21 @@ class MyWindow(Gtk.ApplicationWindow):
         # application or an "ActionGroup"
 
         # Create a new menu, containing that action
-        menu = Gio.Menu.new()
-        menu.append("Do Something", "win.something")  # Or you would do app.grape if you had attached the
-        # action to the application
+        # menu = Gio.Menu.new()
+        # menu.add("Do Something", "win.something")  # Or you would do app.grape if you had attached the
+        # # action to the application
 
         # Create a popover
-        self.popover = Gtk.PopoverMenu()  # Create a new popover menu
-        self.popover.set_menu_model(menu)
-
-        # Create a menu button
-        self.hamburger = Gtk.MenuButton()
-        self.hamburger.set_popover(self.popover)
-        self.hamburger.set_icon_name("open-menu-symbolic")  # Give it a nice icon
-
-        # Add menu button to the header bar
-        self.header.pack_start(self.hamburger)
+        # self.popover = Gtk.PopoverMenu()  # Create a new popover menu
+        # self.popover.set_menu_model(menu)
+        #
+        # # Create a menu button
+        # self.hamburger = Gtk.MenuButton()
+        # self.hamburger.set_popover(self.popover)
+        # self.hamburger.set_icon_name("open-menu-symbolic")  # Give it a nice icon
+        #
+        # # Add menu button to the header bar
+        # self.header.pack_start(self.hamburger)
 
         # set app name
         GLib.set_application_name("Saturn")
@@ -275,7 +286,7 @@ class MyWindow(Gtk.ApplicationWindow):
         action = Gio.SimpleAction.new("about", None)
         action.connect("activate", self.show_about)
         self.add_action(action)  # Here the action is being added to the window, but you could add it to the
-        menu.append("About", "win.about")
+        #menu.add("About", "win.about")
 
     def make_request(self, event):
         request = (Requests
@@ -307,7 +318,7 @@ class MyWindow(Gtk.ApplicationWindow):
             parsed = json.loads(resp.data)
 
             for header in resp.headers:
-                liststore.append([header, resp.headers[header]])
+                liststore.add([header, resp.headers[header]])
 
             self.header_status.update_data(resp)
 

@@ -6,14 +6,12 @@ from ui.widgets.query_item import QueryItem
 from ui.widgets.source_view import SourceView
 from utils.database import Body, Requests, create_needed_tables
 
-gi.require_version('Gtk', '4.0')
-gi.require_version('GtkSource', '5')
+gi.require_version('Gtk', '3.0')
+gi.require_version('GtkSource', '4')
 
 from gi.repository import Gtk, Pango, Gio, GtkSource
 
 from ui.widgets.header_item import HeaderItem
-from utils.methods import items
-from utils.misc import get_name_by_type, get_type_color_label
 
 
 class QueryPanel(Gtk.Box):
@@ -21,7 +19,6 @@ class QueryPanel(Gtk.Box):
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
         self.container_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.listbox = Gtk.ListBox()
-        self.listbox.set_size_request(300, self.listbox.get_height())
         self.header_headers_container = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
         self.label_header_description = Gtk.Label()
         self.label_header_description.set_xalign(0)
@@ -29,7 +26,7 @@ class QueryPanel(Gtk.Box):
         self.label_header_description.set_margin_top(0)
         self.label_header_description.set_margin_start(10)
         self.label_header_description.set_markup("<span weight='light' size='large'>HTTP Headers</span>")
-        self.header_headers_container.append(self.label_header_description)
+        self.header_headers_container.add(self.label_header_description)
 
         self.list_box_headers = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
         self.list_box_headers.set_margin_top(0)
@@ -37,16 +34,16 @@ class QueryPanel(Gtk.Box):
 
         self.box = Gtk.Box()
         self.icon = Gtk.Image(icon_name="list-add-symbolic")
-        self.box.append(self.icon)
+        self.box.add(self.icon)
         self.box.set_tooltip_text('Add Header')
         self.button = Gtk.Button(child=self.box)
         self.button.set_name("add-button")
         self.button.set_margin_top(10)
         self.button.set_margin_end(10)
-        self.button.connect("clicked", lambda button: self.list_box_headers.append(HeaderItem()))
-        self.header_headers_container.append(self.button)
+        self.button.connect("clicked", lambda button: self.list_box_headers.add(HeaderItem()))
+        self.header_headers_container.add(self.button)
 
-        self.list_box_headers.append(self.header_headers_container)
+        self.list_box_headers.add(self.header_headers_container)
 
         self.options_query = Gtk.Notebook()
         self.options_query.set_vexpand(True)
@@ -55,7 +52,7 @@ class QueryPanel(Gtk.Box):
         self.scrolled_window.set_hexpand(True)
         self.scrolled_window.set_vexpand(True)
 
-        self.scrolled_window.set_child(self.listbox)
+        self.scrolled_window.add(self.listbox)
 
         buffer = GtkSource.Buffer()
 
@@ -67,7 +64,7 @@ class QueryPanel(Gtk.Box):
 
         self.sv = SourceView(buffer, True)
 
-        sw.set_child(self.sv)
+        sw.add(self.sv)
 
         self.options_query.append_page(self.scrolled_window, Gtk.Label(label="Query"))
         self.options_query.append_page(sw, Gtk.Label(label="Body"))
@@ -76,7 +73,7 @@ class QueryPanel(Gtk.Box):
         self.options_query.append_page(Gtk.Label(label="Auth"), Gtk.Label(label="Auth"))
         self.options_query.append_page(Gtk.Label(label="Events"), Gtk.Label(label="Events"))
 
-        self.container_box.append(self.options_query)
+        self.container_box.add(self.options_query)
 
         def show_menu(widget, event):
             set_selected_row(event)
@@ -123,4 +120,4 @@ class QueryPanel(Gtk.Box):
             print(e)
             create_needed_tables()
 
-        self.append(self.container_box)
+        self.add(self.container_box)

@@ -1,5 +1,5 @@
 import gi
-gi.require_version('Gtk', '4.0')
+gi.require_version('Gtk', '3.0')
 gi.require_version('GdkPixbuf', '2.0')
 from gi.repository import GdkPixbuf, Gtk, Gdk, Pango, Gio, GLib
 
@@ -25,17 +25,17 @@ class HeaderItem(Gtk.Box):
         self.box = Gtk.Box()
         self.icon = Gtk.Image(icon_name="edit-delete-symbolic")
 
-        self.box.append(self.icon)
+        self.box.add(self.icon)
 
         self.box.set_tooltip_text('Delete')
         self.button = Gtk.Button(child=self.box)
         self.button.set_name("delete-button")
         self.button.connect("clicked", self.remove_me)
 
-        self.append(self.check_status)
-        self.append(self.entry_key)
-        self.append(self.entry_value)
-        self.append(self.button)
+        self.add(self.check_status)
+        self.add(self.entry_key)
+        self.add(self.entry_value)
+        self.add(self.button)
 
     def on_check_toggled(self, check):
         if check.props.active:

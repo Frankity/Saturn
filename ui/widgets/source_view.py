@@ -2,8 +2,8 @@ import json
 
 import gi
 
-gi.require_version('Gtk', '4.0')
-gi.require_version('GtkSource', '5')
+gi.require_version('Gtk', '3.0')
+gi.require_version('GtkSource', '4')
 
 from gi.repository import Gtk, GtkSource, Gio, GLib
 
@@ -21,7 +21,7 @@ class SourceView(GtkSource.View):
         # add this format menu actions
         self.context_menu_model.append_item(self.format_menu_item)
 
-        self.set_extra_menu(self.context_menu_model)
+        #self.set_extra_menu(self.context_menu_model)
 
         self.action_group = Gio.SimpleActionGroup.new()
 

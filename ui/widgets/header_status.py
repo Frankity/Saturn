@@ -1,6 +1,6 @@
 import gi
 
-gi.require_version('Gtk', '4.0')
+gi.require_version('Gtk', '3.0')
 gi.require_version('GdkPixbuf', '2.0')
 from gi.repository import Gtk
 
@@ -24,18 +24,18 @@ class HeaderStatus(Gtk.Box):
         box = Gtk.Box(spacing=6)
         icon = Gtk.Image(icon_name="system-run-symbolic")
         label = Gtk.Label(label="Run")
-        box.append(icon)
-        box.append(label)
+        box.add(icon)
+        box.add(label)
         button = Gtk.Button(child=box)
         button.set_halign(Gtk.Align.END)
         button.set_margin_end(10)
         button.set_hexpand(True)  # trick to right align
         button.connect("clicked", main_window_instance.make_request)
 
-        self.append(self.label_status)
-        self.append(self.label_size)
-        self.append(self.label_time)
-        self.append(button)
+        self.add(self.label_status)
+        self.add(self.label_size)
+        self.add(self.label_time)
+        self.add(button)
 
     def update_data(self, response):
         status = response.status

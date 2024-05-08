@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+    <schema id="xyz.frankity.saturn" path="/xyz/frankity/saturn/">
+        <key name="selected-row" type="i">
+            <default>0</default>
+            <summary>selected-row</summary>
+            <description>More detailed description of the example setting.</description>
+        </key>
+    </schema>
+</schemalist>
