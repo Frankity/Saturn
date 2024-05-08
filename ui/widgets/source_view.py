@@ -39,7 +39,8 @@ class SourceView(GtkSource.View):
         buffer.set_language(json_lang)
 
         style_scheme_manager = GtkSource.StyleSchemeManager.get_default()
-        style_scheme = style_scheme_manager.get_scheme('Adwaita-dark')
+        #print(GtkSource.StyleSchemeManager.get_scheme_ids())
+        style_scheme = style_scheme_manager.get_scheme('tango')
         if style_scheme:
             buffer.set_style_scheme(style_scheme)
 
