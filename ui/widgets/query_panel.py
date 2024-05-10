@@ -3,7 +3,6 @@ import json
 import gi
 
 from ui.widgets.query_item import QueryItem
-from ui.widgets.source_view import SourceView
 from utils.database import Body, Requests, create_needed_tables
 
 gi.require_version('Gtk', '3.0')
@@ -54,26 +53,11 @@ class QueryPanel(Gtk.Box):
 
         self.scrolled_window.add(self.listbox)
 
-        buffer = GtkSource.Buffer()
+        def set_selected_row(row):
+            app_settings = Gio.Settings.new(schema_id='xyz.frankity.saturn')
+            app_settings.set_int('selected-row', row.id)
 
-        sw = Gtk.ScrolledWindow()
-        sw.set_margin_top(5)
-        sw.set_margin_bottom(5)
-        sw.set_margin_start(5)
-        sw.set_margin_end(5)
-
-        self.sv = SourceView(buffer, True)
-
-        sw.add(self.sv)
-
-        self.options_query.append_page(self.scrolled_window, Gtk.Label(label="Query"))
-        self.options_query.append_page(sw, Gtk.Label(label="Body"))
-        self.options_query.append_page(Gtk.Label(label="Params"), Gtk.Label(label="Params"))
-        self.options_query.append_page(self.list_box_headers, Gtk.Label(label="Headers"))
-        self.options_query.append_page(Gtk.Label(label="Auth"), Gtk.Label(label="Auth"))
-        self.options_query.append_page(Gtk.Label(label="Events"), Gtk.Label(label="Events"))
-
-        self.container_box.add(self.options_query)
+        self.add(self.scrolled_window)
 
         def show_menu(widget, event):
             set_selected_row(event)
@@ -81,25 +65,6 @@ class QueryPanel(Gtk.Box):
         self.listbox.connect("row-selected", show_menu)
 
         self.add_request_to_list()
-
-        def set_selected_row(row):
-
-            app_settings = Gio.Settings.new(schema_id='xyz.frankity.saturn')
-            app_settings.set_int('selected-row', row.id)
-
-    def on_setting_changed(self, settings, key):
-        try:
-            value = settings.get_int(key)
-            body_data = (Body
-                         .select(Body.body)
-                         .where(Body.request == int(value))
-                         .first())
-            parsed_json = json.loads(body_data.body if body_data is not None else "{}")
-            formatted_json = json.dumps(parsed_json, indent=8)
-            self.sv.get_buffer().set_text(formatted_json)
-
-        except Exception as e:
-            print(e)
 
     def clear_list(self):
         request_items = Requests.select().count()

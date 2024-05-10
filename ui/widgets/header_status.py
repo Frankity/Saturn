@@ -8,9 +8,9 @@ from gi.repository import Gtk
 class HeaderStatus(Gtk.Box):
     def __init__(self, main_window_instance):
         super().__init__(orientation=Gtk.Orientation.HORIZONTAL, spacing=50)
-        self.set_margin_top(20)
-        self.set_margin_bottom(15)
-        self.set_margin_start(10)
+        self.set_margin_top(0)
+        self.set_margin_bottom(0)
+        self.set_margin_start(0)
         self.label_status = Gtk.Label()
         self.label_status.set_markup("<span weight='light' size='medium'>Status: </span><span weight='bold' "
                                      "color='#008800'></span>")
@@ -21,21 +21,9 @@ class HeaderStatus(Gtk.Box):
         self.label_time.set_markup("<span weight='light' size='medium'>Time: </span><span weight='bold' "
                                    "color='#008800'>0 ms</span>")
 
-        box = Gtk.Box(spacing=6)
-        icon = Gtk.Image(icon_name="system-run-symbolic")
-        label = Gtk.Label(label="Run")
-        box.add(icon)
-        box.add(label)
-        button = Gtk.Button(child=box)
-        button.set_halign(Gtk.Align.END)
-        button.set_margin_end(10)
-        button.set_hexpand(True)  # trick to right align
-        button.connect("clicked", main_window_instance.make_request)
-
         self.add(self.label_status)
         self.add(self.label_size)
         self.add(self.label_time)
-        self.add(button)
 
     def update_data(self, response):
         status = response.status
