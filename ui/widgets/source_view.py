@@ -40,7 +40,7 @@ class SourceView(GtkSource.View):
 
         style_scheme_manager = GtkSource.StyleSchemeManager.get_default()
         #print(GtkSource.StyleSchemeManager.get_scheme_ids())
-        style_scheme = style_scheme_manager.get_scheme('monokai-extended')
+        style_scheme = style_scheme_manager.get_scheme('saturn')
         if style_scheme:
             buffer.set_style_scheme(style_scheme)
 

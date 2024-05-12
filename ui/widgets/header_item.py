@@ -9,7 +9,7 @@ class HeaderItem(Gtk.Box):
         super().__init__(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
 
         self.check_status = Gtk.CheckButton()
-        self.check_status.activate()
+        self.check_status.set_active(True)
         self.check_status.connect('toggled', self.on_check_toggled)
         self.set_margin_start(10)
         self.set_margin_top(10)
@@ -36,6 +36,9 @@ class HeaderItem(Gtk.Box):
         self.add(self.entry_key)
         self.add(self.entry_value)
         self.add(self.button)
+        self.show_all()
+        print("added")
+
 
     def on_check_toggled(self, check):
         if check.props.active:

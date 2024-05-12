@@ -1,6 +1,7 @@
 import json
 import time
 
+import re
 import gi
 import urllib3
 
@@ -32,11 +33,22 @@ class RequestContainer(Gtk.Box):
 
         self.header_status = HeaderStatus(self)
 
-        self.combo_box_environment = Gtk.Label(label='Sample-Saturn-Collection')
-        self.combo_box_environment.set_xalign(2)
-        self.combo_box_environment.set_hexpand(True)
+        strings = Gtk.ListStore(str)
+        item = "Default"
+        strings.append([item])
+        self.env_label = Gtk.Label(label='Environment:')
+        self.env_label.set_xalign(2)
+        self.env_label.set_hexpand(True)
+        self.combo_box_environment = Gtk.ComboBox.new_with_model(model=strings)
+        renderer_text = Gtk.CellRendererText()
+        self.combo_box_environment.pack_start(renderer_text, True)
+        self.combo_box_environment.add_attribute(renderer_text, "text", 0)
+        self.combo_box_environment.set_active(0)
+
+        self.combo_box_environment.set_hexpand(False)
 
         self.box_header_container.add(self.header_status)
+        self.box_header_container.add(self.env_label)
         self.box_header_container.add(self.combo_box_environment)
 
         self.add(self.box_header_container)
@@ -83,78 +95,11 @@ class RequestContainer(Gtk.Box):
         except Exception as e:
             print(e)
 
-    def make_request(self, event):
-        from ui.main_window import app_settings
+def parse_error_message(error_response):
+    pattern = r"Failed to resolve '([^']+)' \(\[Errno -2\] Name or service not known\)"
+    match = re.search(pattern, error_response)
 
-        request = (Requests
-                   .select(Requests.type, Requests.url)
-                   .where(Requests.id == app_settings.get_int('selected-row'))
-                   .first())
-        http = urllib3.PoolManager()
-        liststore = Gtk.ListStore(str, str)
-        method = get_name_by_type(self.notebook_content.dropdown.get_active() + 1) # indexed
-
-        start_iter = self.pre_request_container.sv.get_buffer().get_start_iter()
-        end_iter = self.pre_request_container.sv.get_buffer().get_end_iter()
-        body = self.pre_request_container.sv.get_buffer().get_text(start_iter, end_iter, True)
-
-        response_failure_data = {
-            'status': 0,
-            'elapsed': 0,
-            'headers': {'Content-Length': 0}
-        }
-        response_fail = ResponseData(
-            response_failure_data['status'],
-            response_failure_data['elapsed'],
-            response_failure_data['headers']
-        )
-
-        try:
-            start_time = time.time()
-            resp = http.request(
-                method=get_name_by_type(request.type),
-                url=self.notebook_content.entry_url.get_text(),
-                body=body if method in ["POST", "PUT", "PATCH"] else None,
-                headers={'Content-Type': 'application/json'},
-            )
-
-            end_time = time.time()
-
-            elapsed = end_time - start_time
-            resp.elapsed = elapsed
-
-            parsed = json.loads(resp.data)
-
-            for header in resp.headers:
-                liststore.append([header, resp.headers[header]])
-
-            self.header_status.update_data(resp)
-
-            formatted_json = json.dumps(parsed, indent=8, sort_keys=True)
-
-            self.post_request_container.response_panel.header_response.set_list_store(liststore)
-            self.post_request_container.response_panel.source_view.get_buffer().set_text(formatted_json)
-
-        except urllib3.exceptions.HTTPWarning as e:
-            # Handle urllib3 exceptions here
-            print("URLError:", e)
-            self.post_request_container.response_panel.source_view.get_buffer().set_text(str(e.args), len(str(e.args)))
-            # Set header even in case of error
-            self.header_status.update_data(response_fail)
-
-        except urllib3.exceptions.HTTPError as e:
-            print("HTTPError:", e)
-            self.post_request_container.response_panel.source_view.get_buffer().set_text(str(e.args), len(str(e.args)))
-            # Set header even in case of error
-            self.header_status.update_data(response_fail)
-
-        except Exception as e:
-            # Handle other exceptions here
-            print("An unexpected error occurred:", e)
-            self.post_request_container.response_panel.source_view.get_buffer().set_text(str(e.args), len(str(e.args)))
-            # Set header even in case of error
-            self.header_status.update_data(response_fail)
-
-        finally:
-            # Any cleanup or final actions can go here
-            pass
+    if match:
+        return match.group(0)
+    else:
+        return error_response
