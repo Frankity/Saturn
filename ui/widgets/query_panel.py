@@ -1,16 +1,12 @@
-import json
-
 import gi
 
 from ui.widgets.query_item import QueryItem
-from utils.database import Body, Requests, create_needed_tables
+from utils.database import Requests, create_needed_tables
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('GtkSource', '4')
 
-from gi.repository import Gtk, Pango, Gio, GtkSource
-
-from ui.widgets.header_item import HeaderItem
+from gi.repository import Gtk, Gio
 
 
 class QueryPanel(Gtk.Box):

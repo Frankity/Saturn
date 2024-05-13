@@ -12,7 +12,7 @@ from urllib3.exceptions import (
 from gi.repository import Gtk, GtkSource
 
 from models.response_data import ResponseData
-from ui.widgets.header_item import HeaderItem
+from ui.widgets.request_headers.header_item import HeaderItem
 from utils.database import Requests
 from utils.misc import get_name_by_type
 
@@ -37,7 +37,7 @@ class RequestHandler:
             True
         )
 
-        header_items = self.main_window_instance.pre_request_container.list_box_headers.get_children()
+        header_items = self.main_window_instance.pre_request_container.request_headers_container.list_box_headers.get_children()
         headers = [(h.key, h.value) for h in header_items if isinstance(h, HeaderItem)]
         return request, method, body, headers
 

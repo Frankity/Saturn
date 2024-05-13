@@ -1,7 +1,5 @@
-
-from peewee import SqliteDatabase, Model, AutoField, IntegerField, CharField
+from peewee import SqliteDatabase, Model, AutoField, IntegerField, CharField, BooleanField
 from pydantic import BaseModel, Field, HttpUrl
-
 
 database = SqliteDatabase("saturn.db")
 
@@ -48,6 +46,18 @@ class Headers(Model):
     class Meta:
         database = database
 
+
+class Params(Model):
+    id = AutoField(primary_key=True)
+    key = CharField()
+    value = CharField()
+    request = IntegerField()
+    enabled = BooleanField()
+
+    class Meta:
+        database = database
+
+
 def create_needed_tables():
     with database as db:
-        db.create_tables([Collection, Requests, Body, Headers])
+        db.create_tables([Collection, Requests, Body, Headers, Params])

@@ -1,18 +1,19 @@
 import json
 import gi
+import urllib3
 
-from ui.widgets.header_item import HeaderItem
+from ui.widgets.request_headers.header_item import HeaderItem
 from ui.widgets.header_status import HeaderStatus
 from ui.widgets.post_response_container import PostRequestContainer
 from ui.widgets.pre_request_container import PreRequestContainer
 from ui.widgets.query_input import QueryInput
-from utils.database import Body, Requests, Headers
-from utils.misc import get_name_by_type
+from ui.widgets.request_params.param_item import ParamItem
+from utils.database import Body, Requests, Headers, Params
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('GtkSource', '4')
 
-from gi.repository import Gtk, Pango, Gio, GtkSource
+from gi.repository import Gtk
 
 
 class RequestContainer(Gtk.Box):
@@ -73,6 +74,7 @@ class RequestContainer(Gtk.Box):
                          .select(Body.body)
                          .where(Body.request == int(value))
                          .first())
+
             request_data = (Requests
                             .select(Requests.name,
                                     Requests.url,
@@ -86,6 +88,14 @@ class RequestContainer(Gtk.Box):
                                     Headers.id)
                             .where(Headers.request == int(value)))
 
+            params_data = (Params
+                           .select(
+                Params.key,
+                Params.value,
+                Params.id,
+                Params.enabled)
+                           .where(Params.request == int(value)))
+
             parsed_json = json.loads(body_data.body if body_data is not None else "{}")
             formatted_json = json.dumps(parsed_json, indent=8)
 
@@ -94,10 +104,55 @@ class RequestContainer(Gtk.Box):
             self.notebook_content.dropdown.set_active(request_data.type - 1)
             self.notebook_response.set_tab_label(self.notebook_content, Gtk.Label(label=request_data.name))
 
-            for header in headers_data:
+            self.get_headers(headers_data)
 
-                header_item = HeaderItem(key=header.key, value=header.value, hid=header.id,  request=header.request)
-                self.pre_request_container.list_box_headers.add(header_item)
+            self.get_query_params(params_data, request_data)
 
         except Exception as e:
             print(e)
+
+    def get_headers(self, headers_data):
+        for existing_header in self.pre_request_container.request_headers_container.list_box_headers.get_children():
+            if isinstance(existing_header, HeaderItem):
+                self.pre_request_container.request_headers_container.list_box_headers.remove(existing_header)
+
+        for header in headers_data:
+            header_item = HeaderItem(key=header.key, value=header.value, hid=header.id, request=header.request)
+            self.pre_request_container.request_headers_container.list_box_headers.add(header_item)
+
+    def get_query_params(self, params_data, request_data):
+
+        for existing_param in self.pre_request_container.request_params_container.list_box_params.get_children():
+            if isinstance(existing_param, ParamItem):
+                self.pre_request_container.request_params_container.list_box_params.remove(existing_param)
+
+        for param in params_data:
+            param_item = ParamItem(key=param.key, value=param.value, hid=param.id, request=param.request, enabled=param.enabled)
+            self.pre_request_container.request_params_container.list_box_params.add(param_item)
+
+        param_object = {}
+        for param in params_data:
+            if param.enabled:
+                param_object[param.key] = param.value
+
+        query_string = self.manual_encode(param_object)
+
+        if query_string:
+            self.notebook_content.entry_url.set_text(f"{request_data.url}?{query_string}")
+
+    def manual_encode(self, params):
+        encoded_params = []
+        for key, value in params.items():
+            encoded_key = key.replace(' ', '+')  # Replace spaces with '+'
+            encoded_value = value.replace(' ', '+')  # Replace spaces with '+'
+            encoded_params.append(f"{encoded_key}={encoded_value}")
+
+        query_string = '&'.join(encoded_params)
+        return query_string
+
+        #def set_query_params_to_url(self, params):
+
+
+        #query_string = urllib3.request.urlencode(params)
+
+
