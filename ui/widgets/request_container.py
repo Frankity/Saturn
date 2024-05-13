@@ -1,16 +1,12 @@
 import json
-import time
-
-import re
 import gi
-import urllib3
 
-from models.response_data import ResponseData
+from ui.widgets.header_item import HeaderItem
 from ui.widgets.header_status import HeaderStatus
 from ui.widgets.post_response_container import PostRequestContainer
 from ui.widgets.pre_request_container import PreRequestContainer
 from ui.widgets.query_input import QueryInput
-from utils.database import Body, Requests
+from utils.database import Body, Requests, Headers
 from utils.misc import get_name_by_type
 
 gi.require_version('Gtk', '3.0')
@@ -84,6 +80,12 @@ class RequestContainer(Gtk.Box):
                             .where(Requests.id == int(value))
                             .first())
 
+            headers_data = (Headers
+                            .select(Headers.key,
+                                    Headers.value,
+                                    Headers.id)
+                            .where(Headers.request == int(value)))
+
             parsed_json = json.loads(body_data.body if body_data is not None else "{}")
             formatted_json = json.dumps(parsed_json, indent=8)
 
@@ -92,14 +94,10 @@ class RequestContainer(Gtk.Box):
             self.notebook_content.dropdown.set_active(request_data.type - 1)
             self.notebook_response.set_tab_label(self.notebook_content, Gtk.Label(label=request_data.name))
 
+            for header in headers_data:
+
+                header_item = HeaderItem(key=header.key, value=header.value, hid=header.id,  request=header.request)
+                self.pre_request_container.list_box_headers.add(header_item)
+
         except Exception as e:
             print(e)
-
-def parse_error_message(error_response):
-    pattern = r"Failed to resolve '([^']+)' \(\[Errno -2\] Name or service not known\)"
-    match = re.search(pattern, error_response)
-
-    if match:
-        return match.group(0)
-    else:
-        return error_response

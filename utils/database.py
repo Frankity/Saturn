@@ -39,6 +39,15 @@ class Body(Model):
         database = database
 
 
+class Headers(Model):
+    id = AutoField(primary_key=True)
+    key = CharField()
+    value = CharField()
+    request = IntegerField()
+
+    class Meta:
+        database = database
+
 def create_needed_tables():
     with database as db:
-        db.create_tables([Collection, Requests, Body])
+        db.create_tables([Collection, Requests, Body, Headers])

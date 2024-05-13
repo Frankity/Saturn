@@ -209,7 +209,7 @@ class MyWindow(Gtk.Window):
         self.about.set_license_type(Gtk.License.GPL_3_0)
         self.about.set_website("http://github.com/frankiity")
         self.about.set_website_label("Github")
-        self.about.set_version("1.0")
+        self.about.set_version("0.0.1")
         # logo = GdkPixbuf.Pixbuf.new_from_file("red_saturn.png")
         self.about.set_logo_icon_name("face-wink")
         # logo_texture = Gdk.Texture.new_for_pixbuf(logo)

@@ -79,7 +79,6 @@ class QueryInput(Gtk.Box):
         container_box.set_margin_bottom(5)
         self.add(container_box)
 
-        print(get_name_by_type(self.dropdown.get_active() + 1))
 
     def manage_button(self, event):
         if self.entry_url.get_text() == "":

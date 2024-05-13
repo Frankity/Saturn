@@ -12,6 +12,7 @@ from urllib3.exceptions import (
 from gi.repository import Gtk, GtkSource
 
 from models.response_data import ResponseData
+from ui.widgets.header_item import HeaderItem
 from utils.database import Requests
 from utils.misc import get_name_by_type
 
@@ -35,7 +36,10 @@ class RequestHandler:
             self.main_window_instance.pre_request_container.sv.get_buffer().get_end_iter(),
             True
         )
-        return request, method, body
+
+        header_items = self.main_window_instance.pre_request_container.list_box_headers.get_children()
+        headers = [(h.key, h.value) for h in header_items if isinstance(h, HeaderItem)]
+        return request, method, body, headers
 
     def _handle_error(self, error, response_fail):
         error_message = error.args[0] if error.args else "Unknown error"
@@ -48,7 +52,7 @@ class RequestHandler:
             len(str(error.args)))
 
     def make_request(self, event):
-        request, method, body = self._get_request_data()
+        request, method, body, headers = self._get_request_data()
 
         response_failure_data = {
             'status': 0,
@@ -61,13 +65,18 @@ class RequestHandler:
             response_failure_data['headers']
         )
 
+        headers_dict = dict(headers)
+        headers_dict["User-Agent"] = str("Saturn/0.0.1")
+
+        headers_dict = {str(k): str(v) for k, v in headers_dict.items()}
+
         try:
             start_time = time.time()
             resp = self.http.request(
                 method=method,
                 url=self.main_window_instance.notebook_content.entry_url.get_text(),
                 body=body if method in ["POST", "PUT", "PATCH"] else None,
-                headers={'Content-Type': 'application/json'},
+                headers=headers_dict,
             )
 
             end_time = time.time()

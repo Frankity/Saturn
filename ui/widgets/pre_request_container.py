@@ -61,9 +61,14 @@ class PreRequestContainer(Gtk.Box):
 
         self.list_box_headers.add(self.header_headers_container)
 
+        self.scrolled_window_headers = Gtk.ScrolledWindow()
+        self.scrolled_window_headers.set_hexpand(True)
+        self.scrolled_window_headers.set_vexpand(True)
+        self.scrolled_window_headers.add(self.list_box_headers)
+
         self.options_query.append_page(Gtk.Label(label="Params"), Gtk.Label(label="Params"))
         self.options_query.append_page(sw, Gtk.Label(label="Body"))
-        self.options_query.append_page(self.list_box_headers, Gtk.Label(label="Headers"))
+        self.options_query.append_page(self.scrolled_window_headers, Gtk.Label(label="Headers"))
         self.options_query.append_page(Gtk.Label(label="Auth"), Gtk.Label(label="Auth"))
         self.options_query.append_page(Gtk.Label(label="Events"), Gtk.Label(label="Events"))
 

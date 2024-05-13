@@ -1,3 +1,5 @@
+import json
+
 from utils.methods import items
 
 
@@ -24,3 +26,9 @@ def get_type_color_label(tpe):
         return 'type-post-label'
     elif tpe == 4:
         return 'type-delete-label'
+
+
+class SingleQuoteEncoder(json.JSONEncoder):
+    def encode_string(self, s):
+        # Replace double quotes with single quotes
+        return "'" + s.replace("'", "\\'") + "'"
