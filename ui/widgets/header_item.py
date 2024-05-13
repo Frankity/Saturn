@@ -1,8 +1,12 @@
 import gi
 
+from utils.database import Headers
+
 gi.require_version('Gtk', '3.0')
 gi.require_version('GdkPixbuf', '2.0')
-from gi.repository import GdkPixbuf, Gtk, Gdk, Pango, Gio, GLib
+from gi.repository import Gtk
+
+
 
 
 class HeaderItem(Gtk.Box):
@@ -49,13 +53,35 @@ class HeaderItem(Gtk.Box):
         self.header_container.add(self.entry_value)
         self.header_container.add(self.button)
         self.add(self.header_container)
+
+        if self.hid == None:
+            self.hid = self.save_to_database()
+
         self.show_all()
+
+    def save_to_database(self):
+        from ui.main_window import app_settings
+        selected_row_id = app_settings.get_int('selected-row')
+        result = (Headers
+                  .insert(key='', value='', request=selected_row_id)
+                  #       .on_conflict(
+                  # conflict_target=Headers.request,
+                  # preserve=(Headers.key, Headers.value),
+                  # update={Headers.key: Headers.key, Headers.value: Headers.value})
+                  .execute())
+        return result
 
     def set_key_text(self, event):
         self.key = event.get_text()
+        header = Headers.get(Headers.id == self.hid)
+        header.key = self.key
+        header.save()
 
     def set_value_text(self, event):
         self.value = event.get_text()
+        header = Headers.get(Headers.id == self.hid)
+        header.value = self.value
+        header.save()
 
     def on_check_toggled(self, check):
         if check.props.active:
@@ -68,6 +94,7 @@ class HeaderItem(Gtk.Box):
             self.button.set_sensitive(False)
 
     def remove_me(self, button):
+        Headers.delete().where(Headers.id == self.hid).execute()
         parent = self.get_parent()
         if parent is not None:
             parent.remove(self)
