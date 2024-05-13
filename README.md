@@ -1,13 +1,13 @@
 # Saturn
 
-Saturn is a lightweight and native REST client application designed for Linux environments. Built using PyGTK with Gtk4 and GtkSourceView 4, it offers a simple and user-friendly interface, emphasizing minimal resource consumption compared to other clients available on the internet.
+Saturn is a lightweight and native REST client application designed for Linux environments. Built using PyGTK with Gtk3, it offers a simple and user-friendly interface, emphasizing minimal resource consumption compared to other clients available on the internet.
 
 ## Features
 - **Lightweight:** Saturn is optimized for minimal resource usage, ensuring smooth performance even on low-end systems.
 - **Native:** Developed specifically for Linux environments, Saturn seamlessly integrates with the system, providing a cohesive user experience.
 - **User-Friendly Interface:** With a clean and intuitive interface, Saturn makes it easy for users to interact with REST APIs without unnecessary complexity.
 - **PyGTK with Gtk3:** Leveraging the power of PyGTK with Gtk3, Saturn delivers a responsive and efficient application framework.
-- **GtkSourceView 4 Integration:** Saturn utilizes GtkSourceView 4 for enhanced source code editing capabilities, providing a seamless experience for developers.
+- **GtkSourceView 4 Integration:** Used for enhanced Body editing capabilities, providing a seamless experience for developers.
 
 ![Saturn Interface](res/scr_3.png)
 *Saturn Interface*
@@ -44,7 +44,3 @@ This software is under casual development mode, so do not expect updates daily o
 
 ## License
 This project is licensed under the [MIT License](https://opensource.org/license/MIT).
-
-## Acknowledgements
-Special thanks to the PyGTK, Gtk4, and GtkSourceView 5 communities for their invaluable contributions to the development of Saturn.
-
