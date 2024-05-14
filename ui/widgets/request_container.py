@@ -1,6 +1,6 @@
 import json
 import gi
-import urllib3
+from urllib.parse import urlparse, parse_qs, urlencode
 
 from ui.widgets.request_headers.header_item import HeaderItem
 from ui.widgets.header_status import HeaderStatus
@@ -14,6 +14,17 @@ gi.require_version('Gtk', '3.0')
 gi.require_version('GtkSource', '4')
 
 from gi.repository import Gtk
+
+
+def manual_encode(params):
+    encoded_params = []
+    for key, value in params.items():
+        encoded_key = key.replace(' ', '+')  # Replace spaces with '+'
+        encoded_value = value.replace(' ', '+')  # Replace spaces with '+'
+        encoded_params.append(f"{encoded_key}={encoded_value}")
+
+    query_string = '&'.join(encoded_params)
+    return query_string
 
 
 class RequestContainer(Gtk.Box):
@@ -52,7 +63,7 @@ class RequestContainer(Gtk.Box):
 
         self.notebook_response = Gtk.Notebook()
 
-        self.pre_request_container = PreRequestContainer()
+        self.pre_request_container = PreRequestContainer(self)
         self.post_request_container = PostRequestContainer()
 
         paned = Gtk.Paned()
@@ -127,7 +138,8 @@ class RequestContainer(Gtk.Box):
                 self.pre_request_container.request_params_container.list_box_params.remove(existing_param)
 
         for param in params_data:
-            param_item = ParamItem(key=param.key, value=param.value, hid=param.id, request=param.request, enabled=param.enabled)
+            param_item = ParamItem(parent=self, key=param.key, value=param.value, hid=param.id, request=param.request,
+                                   enabled=param.enabled)
             self.pre_request_container.request_params_container.list_box_params.add(param_item)
 
         param_object = {}
@@ -135,24 +147,37 @@ class RequestContainer(Gtk.Box):
             if param.enabled:
                 param_object[param.key] = param.value
 
-        query_string = self.manual_encode(param_object)
+        query_string = manual_encode(param_object)
 
         if query_string:
             self.notebook_content.entry_url.set_text(f"{request_data.url}?{query_string}")
 
-    def manual_encode(self, params):
-        encoded_params = []
-        for key, value in params.items():
-            encoded_key = key.replace(' ', '+')  # Replace spaces with '+'
-            encoded_value = value.replace(' ', '+')  # Replace spaces with '+'
-            encoded_params.append(f"{encoded_key}={encoded_value}")
+    def update_params(self, enabled: bool, param: str):
+        url = self.notebook_content.entry_url.get_text()
+        parsed_url = urlparse(url)
 
-        query_string = '&'.join(encoded_params)
-        return query_string
+        query_params = parse_qs(parsed_url.query)
 
-        #def set_query_params_to_url(self, params):
+        if enabled:
+            query_params.pop(param, None)
+        else:
+            if param is not None:
+                param_object = self.get_param_value(param)
+                print(param_object)
+                query_params[param] = param_object.get(param)
 
+        modified_query_string = urlencode(query_params, doseq=True)
+        modified_url = parsed_url._replace(query=modified_query_string).geturl()
+        self.notebook_content.entry_url.set_text(modified_url)
 
-        #query_string = urllib3.request.urlencode(params)
+    def get_param_value(self, param: str):
+        param_object = {}
+        for existing_param in self.pre_request_container.request_params_container.list_box_params.get_children():
+            if isinstance(existing_param, ParamItem) and existing_param.key == param:
+                param_object[existing_param.key] = existing_param.value
+                break
+        return param_object
 
-
+    def get_url_only(self):
+        parsed_url = urlparse(self.notebook_content.entry_url.get_text())
+        return parsed_url.scheme + "://" + parsed_url.netloc + parsed_url.path

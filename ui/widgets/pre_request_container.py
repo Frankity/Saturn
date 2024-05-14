@@ -11,7 +11,8 @@ from gi.repository import Gtk, GtkSource
 
 
 class PreRequestContainer(Gtk.Box):
-    def __init__(self, main_window_instance=None):
+    def __init__(self, parent=None):
+        self.parent = parent
         super().__init__(orientation=Gtk.Orientation.HORIZONTAL)
 
         self.options_query = Gtk.Notebook()
@@ -34,7 +35,7 @@ class PreRequestContainer(Gtk.Box):
         sw.add(self.sv)
 
         self.request_headers_container = RequestHeadersContainer()
-        self.request_params_container = RequestParamsContainer()
+        self.request_params_container = RequestParamsContainer(parent)
 
         self.scrolled_window_headers = Gtk.ScrolledWindow()
         self.scrolled_window_params = Gtk.ScrolledWindow()

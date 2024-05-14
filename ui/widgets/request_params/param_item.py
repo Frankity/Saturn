@@ -8,7 +8,8 @@ from gi.repository import Gtk
 
 
 class ParamItem(Gtk.Box):
-    def __init__(self, key=None, value=None, hid=None, request=None, enabled=None):
+    def __init__(self, parent=None, key=None, value=None, hid=None, request=None, enabled=None):
+        self.parent = parent
         self.key = key
         self.value = value
         self.hid = hid
@@ -92,11 +93,13 @@ class ParamItem(Gtk.Box):
         param = Params.get(Params.id == self.hid)
         if check.props.active:
             param.enabled = True
+            self.parent.update_params(False, self.key)
             self.entry_key.set_sensitive(True)
             self.entry_value.set_sensitive(True)
             self.button.set_sensitive(True)
         else:
             param.enabled = False
+            self.parent.update_params(True, self.key)
             self.entry_key.set_sensitive(False)
             self.entry_value.set_sensitive(False)
             self.button.set_sensitive(False)

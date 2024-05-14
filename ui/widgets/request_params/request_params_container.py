@@ -9,7 +9,8 @@ from gi.repository import Gtk
 
 
 class RequestParamsContainer(Gtk.Box):
-    def __init__(self):
+    def __init__(self, parent=None):
+        self.parent = None
         super().__init__(orientation=Gtk.Orientation.HORIZONTAL)
 
         self.params_container = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
@@ -33,7 +34,7 @@ class RequestParamsContainer(Gtk.Box):
         self.button.set_name("add-button")
         self.button.set_margin_top(10)
         self.button.set_margin_end(10)
-        self.button.connect("clicked", lambda button: self.list_box_params.add(ParamItem()))
+        self.button.connect("clicked", lambda button: self.list_box_params.add(ParamItem(parent)))
         self.params_container.add(self.button)
 
         self.list_box_params.add(self.params_container)
