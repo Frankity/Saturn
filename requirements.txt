@@ -1,5 +1,5 @@
 annotated-types==0.6.0
-peewee==3.17.3
+peewee==3.17.5
 pycairo==1.26.0
 pydantic==2.7.1
 pydantic_core==2.18.2

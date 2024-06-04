@@ -79,15 +79,18 @@ class ParamItem(Gtk.Box):
 
     def set_key_text(self, event):
         self.key = event.get_text()
-        param = Params.get(Params.id == self.hid)
-        param.key = self.key
-        param.save()
+      #  param = Params.get(Params.id == self.hid)
+      #  param.key = self.key
+      #  param.save()
+
+        self.parent.get_kv()
 
     def set_value_text(self, event):
         self.value = event.get_text()
-        param = Params.get(Params.id == self.hid)
-        param.value = self.value
-        param.save()
+      #  param = Params.get(Params.id == self.hid)
+      #  param.value = self.value
+      #  param.save()
+        self.parent.get_kv()
 
     def on_check_toggled(self, check):
         param = Params.get(Params.id == self.hid)

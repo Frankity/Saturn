@@ -1,12 +1,13 @@
 import json
-import gi
 from urllib.parse import urlparse, parse_qs, urlencode
 
-from ui.widgets.request_headers.header_item import HeaderItem
+import gi
+
 from ui.widgets.header_status import HeaderStatus
 from ui.widgets.post_response_container import PostRequestContainer
 from ui.widgets.pre_request_container import PreRequestContainer
 from ui.widgets.query_input import QueryInput
+from ui.widgets.request_headers.header_item import HeaderItem
 from ui.widgets.request_params.param_item import ParamItem
 from utils.database import Body, Requests, Headers, Params
 
@@ -101,10 +102,10 @@ class RequestContainer(Gtk.Box):
 
             params_data = (Params
                            .select(
-                Params.key,
-                Params.value,
-                Params.id,
-                Params.enabled)
+                                Params.key,
+                                Params.value,
+                                Params.id,
+                                Params.enabled)
                            .where(Params.request == int(value)))
 
             parsed_json = json.loads(body_data.body if body_data is not None else "{}")
@@ -152,18 +153,34 @@ class RequestContainer(Gtk.Box):
         if query_string:
             self.notebook_content.entry_url.set_text(f"{request_data.url}?{query_string}")
 
+    def get_kv(self):
+        param_list = {}
+        for existing_param in self.pre_request_container.request_params_container.list_box_params.get_children():
+            if isinstance(existing_param, ParamItem) and existing_param.enabled:
+                param_list[existing_param.key] = existing_param.value
+
+        query_string = manual_encode(param_list)
+
+        if query_string:
+            self.notebook_content.entry_url.set_text(f"{self.get_url_only()}?{query_string}")
+
     def update_params(self, enabled: bool, param: str):
         url = self.notebook_content.entry_url.get_text()
         parsed_url = urlparse(url)
 
+        param_list = {}
+        for existing_param in self.pre_request_container.request_params_container.list_box_params.get_children():
+            if isinstance(existing_param, ParamItem) and existing_param.enabled:
+                param_list[existing_param.key] = existing_param.value
+
         query_params = parse_qs(parsed_url.query)
 
         if enabled:
+
             query_params.pop(param, None)
         else:
             if param is not None:
                 param_object = self.get_param_value(param)
-                print(param_object)
                 query_params[param] = param_object.get(param)
 
         modified_query_string = urlencode(query_params, doseq=True)
