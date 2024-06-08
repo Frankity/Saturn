@@ -8,7 +8,17 @@ class Requests(Model):
     id = AutoField(primary_key=True)
     name = CharField()
     url = CharField()
-    type = IntegerField()
+    method = IntegerField()
+    folder = CharField()
+
+    class Meta:
+        database = database
+
+
+class Folders(Model):
+    id = AutoField(primary_key=True)
+    name = CharField()
+    environment = IntegerField()
 
     class Meta:
         database = database

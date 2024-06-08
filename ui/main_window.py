@@ -101,7 +101,7 @@ def show_modal(event):
             query = (Requests.insert(
                 name=valida_data_model.name,
                 url=valida_data_model.url,
-                type=valida_data_model.type
+                type=valida_data_model.method
             ))
 
             cursor = query.execute()
@@ -112,7 +112,7 @@ def show_modal(event):
                 request.id = cursor
                 request.name = valida_data.get("name")
                 request.url = valida_data.get("url")
-                request.type = valida_data.get("type")
+                request.method = valida_data.get("type")
 
                 query_panel.listbox.add(QueryItem(request))
 

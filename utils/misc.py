@@ -17,6 +17,17 @@ def get_name_by_type(tpe):
     return None
 
 
+def get_color_by_method(tpe):
+    if tpe == 1:
+        return '#007FFF'
+    elif tpe == 2:
+        return '#008800'
+    elif tpe == 3:
+        return '#FFA500'
+    elif tpe == 4:
+        return '#FF0000'
+
+
 def get_type_color_label(tpe):
     if tpe == 1:
         return 'type-get-label'

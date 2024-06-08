@@ -90,7 +90,7 @@ class RequestContainer(Gtk.Box):
             request_data = (Requests
                             .select(Requests.name,
                                     Requests.url,
-                                    Requests.type)
+                                    Requests.method)
                             .where(Requests.id == int(value))
                             .first())
 
@@ -113,7 +113,7 @@ class RequestContainer(Gtk.Box):
 
             self.pre_request_container.sv.get_buffer().set_text(formatted_json)
             self.notebook_content.entry_url.set_text(request_data.url)
-            self.notebook_content.dropdown.set_active(request_data.type - 1)
+            self.notebook_content.dropdown.set_active(request_data.method - 1)
             self.notebook_response.set_tab_label(self.notebook_content, Gtk.Label(label=request_data.name))
 
             self.get_headers(headers_data)

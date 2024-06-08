@@ -33,8 +33,8 @@ class QueryItem(Gtk.ListBoxRow):
 
         self.label_type = Gtk.Label()
         self.label_type.set_markup(
-            "<span color='#ffffff' size='medium'>   " + get_name_by_type(request.type) + "   </span>")
-        self.label_type.set_name(get_type_color_label(request.type))
+            "<span color='#ffffff' size='medium'>   " + get_name_by_type(request.method) + "   </span>")
+        self.label_type.set_name(get_type_color_label(request.method))
         self.label_type.set_xalign(1)
         self.label_type.set_margin_start(10)
         self.label_type.set_margin_end(5)

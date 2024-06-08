@@ -60,12 +60,10 @@ class ParamItem(Gtk.Box):
             self.check_status.set_active(True)
             self.entry_key.set_sensitive(True)
             self.entry_value.set_sensitive(True)
-            self.button.set_sensitive(True)
         else:
             self.check_status.set_active(False)
             self.entry_key.set_sensitive(False)
             self.entry_value.set_sensitive(False)
-            self.button.set_sensitive(False)
 
         self.show_all()
 
@@ -79,17 +77,17 @@ class ParamItem(Gtk.Box):
 
     def set_key_text(self, event):
         self.key = event.get_text()
-      #  param = Params.get(Params.id == self.hid)
-      #  param.key = self.key
-      #  param.save()
+        param = Params.get(Params.id == self.hid)
+        param.key = self.key
+        param.save()
 
         self.parent.get_kv()
 
     def set_value_text(self, event):
         self.value = event.get_text()
-      #  param = Params.get(Params.id == self.hid)
-      #  param.value = self.value
-      #  param.save()
+        param = Params.get(Params.id == self.hid)
+        param.value = self.value
+        param.save()
         self.parent.get_kv()
 
     def on_check_toggled(self, check):

@@ -29,7 +29,7 @@ class RequestHandler:
     def _get_request_data(self):
         from ui.main_window import app_settings
         selected_row_id = app_settings.get_int('selected-row')
-        request = Requests.select(Requests.type, Requests.url).where(Requests.id == selected_row_id).first()
+        request = Requests.select(Requests.method, Requests.url).where(Requests.id == selected_row_id).first()
         method = get_name_by_type(self.main_window_instance.notebook_content.dropdown.get_active() + 1)  # indexed
         body = self.main_window_instance.pre_request_container.sv.get_buffer().get_text(
             self.main_window_instance.pre_request_container.sv.get_buffer().get_start_iter(),
