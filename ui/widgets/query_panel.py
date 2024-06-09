@@ -2,9 +2,10 @@ import gi
 from peewee import JOIN
 
 from ui.dialogs.add_request_dialog import AddRequestDialog
+from ui.dialogs.yes_no_dialog import YesNoDialog
 from ui.widgets.query_item import QueryItem
-from utils.database import Requests, create_needed_tables, Folders
-from utils.misc import get_name_by_type, get_color_by_method
+from utils.database import Requests, create_needed_tables, Folders, Body, Params, Headers
+from utils.misc import get_name_by_type, get_color_by_method, selected_request
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('GtkSource', '4')
@@ -20,7 +21,7 @@ class QueryPanel(Gtk.Box):
         self.main_window_instance = main_window_instance
         self.set_orientation(Gtk.Orientation.VERTICAL)
         self.set_spacing(5)
-        self.treestore = Gtk.TreeStore(str, int, int)
+        self.treestore = Gtk.TreeStore(str, int, int)  # name,request_id,folder_id
 
         self.search_entry = Gtk.SearchEntry()
         self.search_entry.set_placeholder_text("Search request...")
@@ -28,7 +29,7 @@ class QueryPanel(Gtk.Box):
         self.add(self.search_entry)
 
         self.search_text = ""
-        self.initiate = False # check for first added
+        self.initiate = False  # check for first added
 
         self.scrolled_window = Gtk.ScrolledWindow()
         self.scrolled_window.set_hexpand(True)
@@ -65,7 +66,6 @@ class QueryPanel(Gtk.Box):
                                       f'<b><span color="{get_color_by_method(row.method)}">{get_name_by_type(row.method)}</span></b> {row.name}',
                                       row.id, True])
 
-
     def add_request_to_list(self):
 
         self.filtered_model = self.treestore.filter_new()
@@ -88,7 +88,6 @@ class QueryPanel(Gtk.Box):
             self.scrolled_window.add(self.treeview)
 
         self.initiate = True
-
 
     def on_search_activated(self, event):
         self.search_text = self.search_entry.get_text().lower()
@@ -200,7 +199,6 @@ class QueryPanel(Gtk.Box):
         menu.show_all()
         menu.popup_at_pointer(event)
 
-
     def on_menu_item1_activate(self, widget, tree_iter):
         value = self.treestore[tree_iter][2]
         print(f"Option 1 selected on {value}")
@@ -216,22 +214,54 @@ class QueryPanel(Gtk.Box):
         add_request_dialog = AddRequestDialog(folder_owner=folder_id,
                                               main_window_instance=self.main_window_instance, modify=True)
         add_request_dialog.show()
-    def on_request_item2_activate(self, widget, tree_iter):
-        value = self.treestore[tree_iter][2]
-        print(f"Option 1 selected on {value}")
 
+    def on_request_item2_activate(self, widget, tree_iter):
+        dialog = YesNoDialog(self.main_window_instance,
+                             title="Delete Request",
+                             message="Are you sure about deleting this request?",
+                             )
+        response = dialog.run()
+
+        if response == Gtk.ResponseType.OK:
+            #request
+            req = Requests.get(Requests.id == int(selected_request()))
+            folder_id = req.folder
+            req.delete_instance()
+
+            #body
+            e_body = (Body.select().where(Body.request == int(selected_request()))).first()
+            if e_body is not None:
+                body = Body.get(Body.request == int(selected_request()))
+                body.delete_instance()
+
+            #params
+            e_params = (Params.select().where(Params.request == int(selected_request()))).first()
+            if e_params is not None:
+                param = Params.get(Params.request == int(selected_request()))
+                param.delete_instance()
+
+            #headers
+            e_headers = (Headers.select().where(Headers.request == int(selected_request()))).first()
+            if e_headers is not None:
+                headers = Headers.get(Headers.request == int(selected_request()))
+                headers.delete_instance()
+
+            self.refresh(node_to_expand=int(folder_id))
+
+        elif response == Gtk.ResponseType.CANCEL:
+            print("The Cancel button was clicked")
+
+        dialog.destroy()
 
     def expand_specific_node(self, node_id):
-        # Find the path of the node to expand
-        iter = self.treestore.get_iter_first()
-        while iter is not None:
-            if self.treestore[iter][2] == node_id:
-                path = self.treestore.get_path(iter)
+        it = self.treestore.get_iter_first()
+        while it is not None:
+            if self.treestore[it][2] == node_id:
+                path = self.treestore.get_path(it)
                 self.treeview.expand_row(path, True)
-            iter = self.treestore.iter_next(iter)
+            it = self.treestore.iter_next(it)
 
     def refresh(self, node_to_expand=None):
         self.update_model()
         if node_to_expand:
             self.expand_specific_node(node_to_expand)
-

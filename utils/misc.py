@@ -39,7 +39,14 @@ def get_type_color_label(tpe):
         return 'type-delete-label'
 
 
+def selected_request():
+    from ui.main_window import app_settings
+    return app_settings.get_int('selected-row')
+
+
 class SingleQuoteEncoder(json.JSONEncoder):
     def encode_string(self, s):
         # Replace double quotes with single quotes
         return "'" + s.replace("'", "\\'") + "'"
+
+
