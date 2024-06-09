@@ -5,7 +5,7 @@ import gi
 import urllib3
 
 from core.request_handler import RequestHandler
-from utils.database import Requests
+from utils.database import Requests, Body
 from utils.methods import items
 from utils.misc import get_name_by_type
 
@@ -19,6 +19,7 @@ class QueryInput(Gtk.Box):
     def __init__(self, main_window_instance=None):
         super().__init__(orientation=Gtk.Orientation.HORIZONTAL)
 
+        self.main_window_instance = main_window_instance
         request_handler = RequestHandler(main_window_instance)
 
         self.method_url_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
@@ -54,6 +55,7 @@ class QueryInput(Gtk.Box):
         self.save_box.add(self.save_icon)
         self.save_box.set_tooltip_text('Save Request')
         self.save_button = Gtk.Button(child=self.save_box)
+        self.save_button.connect('clicked', self.update_request)
         self.save_button.set_sensitive(False)
         self.save_button.set_margin_top(5)
 
@@ -79,7 +81,6 @@ class QueryInput(Gtk.Box):
         container_box.set_margin_bottom(5)
         self.add(container_box)
 
-
     def manage_button(self, event):
         if self.entry_url.get_text() == "":
             self.send_button.set_sensitive(False)
@@ -87,3 +88,36 @@ class QueryInput(Gtk.Box):
         else:
             self.send_button.set_sensitive(True)
             self.save_button.set_sensitive(True)
+
+    def update_request(self, widget):
+        from ui.main_window import app_settings
+        selected_row_id = app_settings.get_int('selected-row')
+
+        url = self.entry_url.get_text().strip()
+        method = self.dropdown.get_active() + 1
+
+        req = Requests.get(Requests.id == selected_row_id)
+        req.url = url
+        req.method = method
+        req.save()
+
+        body = self.main_window_instance.request_container.pre_request_container.sv.get_buffer().get_text(
+            self.main_window_instance.request_container.pre_request_container.sv.get_buffer().get_start_iter(),
+            self.main_window_instance.request_container.pre_request_container.sv.get_buffer().get_end_iter(),
+            True
+        )
+
+        req_body = (Body
+                    .select(Body.body)
+                    .where(Body.request == int(selected_row_id))
+                    .first())
+
+        if req_body is None:
+            r_body_new = (Body.insert(body=body, request=int(selected_row_id)).execute())
+            print(r_body_new)
+        else:
+            r_body_upd = Body.get(Body.request == selected_row_id)
+            r_body_upd.body = body
+            r_body_upd.save()
+
+        self.main_window_instance.query_panel.refresh()

@@ -29,7 +29,6 @@ json_response = None
 
 buffer = GtkSource.Buffer()
 header_response = HeaderResponse()
-query_panel = QueryPanel()
 app_settings = Gio.Settings.new(schema_id='xyz.frankity.saturn')
 
 
@@ -74,65 +73,6 @@ def show_overlay(data):
     dialog.show()
 
 
-def show_modal(event):
-    popover = Gtk.Popover()
-
-    popover_container = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
-    entry = Gtk.Entry()
-    entry.set_placeholder_text('Request name')
-
-    combo_box = event.get_parent().get_children()[0]
-    entry_url = event.get_parent().get_children()[1]
-
-    active = combo_box.get_active()
-    selected_text = None
-    if active != -1:
-        selected_text = combo_box.get_model()[active][0]
-
-    method = selected_text
-    url_widget = entry_url
-
-    def store_item(event):
-
-        valida_data = {"name": entry.get_text(), "url": url_widget.get_text(), "type": get_type_by_name(method)}
-        try:
-            valida_data_model = RequestModel(**valida_data)
-
-            query = (Requests.insert(
-                name=valida_data_model.name,
-                url=valida_data_model.url,
-                type=valida_data_model.method
-            ))
-
-            cursor = query.execute()
-            if cursor is not None:
-                url_widget.set_text("")
-                popover.hide()
-                request = Requests()
-                request.id = cursor
-                request.name = valida_data.get("name")
-                request.url = valida_data.get("url")
-                request.method = valida_data.get("type")
-
-                query_panel.listbox.add(QueryItem(request))
-
-        except ValidationError as e:
-            data = {"title": "Atention", "info": e.json()}
-            show_overlay(data)
-
-    button = Gtk.Button(label='Save')
-    button.connect("clicked", store_item)
-    popover_container.add(entry)
-    popover_container.add(button)
-    popover.add(popover_container)
-
-    #event.set_popover(popover)
-
-    popover.show()
-
-
-
-
 def show_open_dialog(self, button):
     self.open_dialog.show()
 
@@ -162,18 +102,20 @@ class MyWindow(Gtk.Window):
 
         self.header_item = None
 
-        query_panel.set_margin_start(5)
-        query_panel.set_margin_end(5)
+        self.query_panel = QueryPanel(self)
+
+        self.query_panel.set_margin_start(5)
+        self.query_panel.set_margin_end(5)
 
         main_box.add(Gtk.Button(label="collection-name"))
 
-        main_box.add(query_panel)
+        main_box.add(self.query_panel)
 
-        request_container = RequestContainer(self)
-        app_settings.connect("changed", request_container.on_setting_changed)
+        self.request_container = RequestContainer(self)
+        app_settings.connect("changed", self.request_container.on_setting_changed)
 
         main_panel.pack1(main_box)
-        main_panel.pack2(request_container)
+        main_panel.pack2(self.request_container)
 
         hb = Gtk.HeaderBar()
         hb.set_show_close_button(True)

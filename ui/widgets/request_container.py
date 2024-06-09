@@ -72,7 +72,7 @@ class RequestContainer(Gtk.Box):
         paned.pack1(self.pre_request_container)
         paned.pack2(self.post_request_container)
 
-        self.notebook_content = QueryInput(self)
+        self.notebook_content = QueryInput(main_window_instance)
 
         self.notebook_response.append_page(self.notebook_content, Gtk.Label(label="Params"))
 
@@ -88,9 +88,7 @@ class RequestContainer(Gtk.Box):
                          .first())
 
             request_data = (Requests
-                            .select(Requests.name,
-                                    Requests.url,
-                                    Requests.method)
+                            .select()
                             .where(Requests.id == int(value))
                             .first())
 
@@ -112,7 +110,10 @@ class RequestContainer(Gtk.Box):
             formatted_json = json.dumps(parsed_json, indent=8)
 
             self.pre_request_container.sv.get_buffer().set_text(formatted_json)
-            self.notebook_content.entry_url.set_text(request_data.url)
+            if request_data.url is not None:
+                self.notebook_content.entry_url.set_text(request_data.url)
+            else:
+                self.notebook_content.entry_url.set_text("")
             self.notebook_content.dropdown.set_active(request_data.method - 1)
             self.notebook_response.set_tab_label(self.notebook_content, Gtk.Label(label=request_data.name))
 
@@ -122,6 +123,7 @@ class RequestContainer(Gtk.Box):
 
         except Exception as e:
             print(e)
+            print("here")
 
     def get_headers(self, headers_data):
         for existing_header in self.pre_request_container.request_headers_container.list_box_headers.get_children():

@@ -1,6 +1,7 @@
 import gi
 from peewee import JOIN
 
+from ui.dialogs.add_request_dialog import AddRequestDialog
 from ui.widgets.query_item import QueryItem
 from utils.database import Requests, create_needed_tables, Folders
 from utils.misc import get_name_by_type, get_color_by_method
@@ -14,6 +15,9 @@ from gi.repository import Gtk, Gio, Gdk
 class QueryPanel(Gtk.Box):
     def __init__(self, main_window_instance=None):
         super().__init__()
+
+        self.treeview = Gtk.TreeView()
+        self.main_window_instance = main_window_instance
         self.set_orientation(Gtk.Orientation.VERTICAL)
         self.set_spacing(5)
         self.treestore = Gtk.TreeStore(str, int, int)
@@ -24,14 +28,19 @@ class QueryPanel(Gtk.Box):
         self.add(self.search_entry)
 
         self.search_text = ""
+        self.initiate = False # check for first added
 
         self.scrolled_window = Gtk.ScrolledWindow()
         self.scrolled_window.set_hexpand(True)
         self.scrolled_window.set_vexpand(True)
+        self.add(self.scrolled_window)
 
+        self.update_model()
         self.add_request_to_list()
 
-    def add_request_to_list(self):
+    def update_model(self):
+
+        self.treestore.clear()
 
         requests = (Requests
                     .select(Requests,
@@ -56,10 +65,13 @@ class QueryPanel(Gtk.Box):
                                       f'<b><span color="{get_color_by_method(row.method)}">{get_name_by_type(row.method)}</span></b> {row.name}',
                                       row.id, True])
 
+
+    def add_request_to_list(self):
+
         self.filtered_model = self.treestore.filter_new()
         self.filtered_model.set_visible_func(self.visible_func)
 
-        self.treeview = Gtk.TreeView(model=self.filtered_model)
+        self.treeview.set_model(self.filtered_model)
         self.treeview.set_headers_visible(False)
 
         selection = self.treeview.get_selection()
@@ -67,14 +79,16 @@ class QueryPanel(Gtk.Box):
         self.treeview.connect("button-press-event", self.on_button_press_event)
 
         renderer = Gtk.CellRendererText()
-        renderer.set_fixed_size(-1, 40)
+        renderer.set_fixed_size(-1, 30)
 
         column = Gtk.TreeViewColumn("Paths", renderer, markup=0)
 
-        self.treeview.append_column(column)
+        if not self.initiate:
+            self.treeview.append_column(column)
+            self.scrolled_window.add(self.treeview)
 
-        self.scrolled_window.add(self.treeview)
-        self.add(self.scrolled_window)
+        self.initiate = True
+
 
     def on_search_activated(self, event):
         self.search_text = self.search_entry.get_text().lower()
@@ -122,13 +136,14 @@ class QueryPanel(Gtk.Box):
                 tree_iter = self.treestore.get_iter(path)
                 # Check if the clicked item is a root node (depth == 1)
                 if path.get_depth() == 1:
-                    self.show_context_menu(event, tree_iter)
+                    self.show_context_menu_over_folder(event, tree_iter)
+                else:
+                    self.show_context_menu_over_request(event, tree_iter)
 
-    def show_context_menu(self, event, tree_iter):
+    def show_context_menu_over_folder(self, event, tree_iter):
         menu = Gtk.Menu()
 
         menu_item_add_folder = Gtk.MenuItem()
-
         box_menu_add_folder = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         icon_add_folder = Gio.ThemedIcon(name="folder-new-symbolic")
         image_add_folder = Gtk.Image.new_from_gicon(icon_add_folder, Gtk.IconSize.BUTTON)
@@ -138,7 +153,6 @@ class QueryPanel(Gtk.Box):
         menu_item_add_folder.add(box_menu_add_folder)
 
         menu_item_add_request = Gtk.MenuItem()
-
         box_menu_add_request = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         icon_add_request = Gio.ThemedIcon(name="bookmark-new-symbolic")
         image_add_request = Gtk.Image.new_from_gicon(icon_add_request, Gtk.IconSize.BUTTON)
@@ -154,14 +168,70 @@ class QueryPanel(Gtk.Box):
         menu_item_add_request.connect("activate", self.on_menu_item2_activate, tree_iter)
 
         menu.show_all()
-
         menu.popup_at_pointer(event)
+
+    def show_context_menu_over_request(self, event, tree_iter):
+        menu = Gtk.Menu()
+
+        menu_item_add_folder = Gtk.MenuItem()
+        box_menu_add_folder = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        icon_add_folder = Gio.ThemedIcon(name="document-edit-symbolic")
+        image_add_folder = Gtk.Image.new_from_gicon(icon_add_folder, Gtk.IconSize.BUTTON)
+        label_add_folder = Gtk.Label(label="   Modify")
+        box_menu_add_folder.pack_start(image_add_folder, False, False, 0)
+        box_menu_add_folder.pack_start(label_add_folder, False, False, 0)
+        menu_item_add_folder.add(box_menu_add_folder)
+
+        menu_item_add_request = Gtk.MenuItem()
+        box_menu_add_request = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        icon_add_request = Gio.ThemedIcon(name="edit-delete-symbolic")
+        image_add_request = Gtk.Image.new_from_gicon(icon_add_request, Gtk.IconSize.BUTTON)
+        label_add_request = Gtk.Label(label="   Delete")
+        box_menu_add_request.pack_start(image_add_request, False, False, 0)
+        box_menu_add_request.pack_start(label_add_request, False, False, 0)
+        menu_item_add_request.add(box_menu_add_request)
+
+        menu.append(menu_item_add_folder)
+        menu.append(menu_item_add_request)
+
+        menu_item_add_folder.connect("activate", self.on_request_item1_activate, tree_iter)
+        menu_item_add_request.connect("activate", self.on_request_item2_activate, tree_iter)
+
+        menu.show_all()
+        menu.popup_at_pointer(event)
+
 
     def on_menu_item1_activate(self, widget, tree_iter):
         value = self.treestore[tree_iter][2]
         print(f"Option 1 selected on {value}")
 
     def on_menu_item2_activate(self, widget, tree_iter):
+        folder_id = self.treestore[tree_iter][2]
+        add_request_dialog = AddRequestDialog(folder_owner=folder_id,
+                                              main_window_instance=self.main_window_instance)
+        add_request_dialog.show()
+
+    def on_request_item1_activate(self, widget, tree_iter):
+        folder_id = self.treestore[tree_iter][2]
+        add_request_dialog = AddRequestDialog(folder_owner=folder_id,
+                                              main_window_instance=self.main_window_instance, modify=True)
+        add_request_dialog.show()
+    def on_request_item2_activate(self, widget, tree_iter):
         value = self.treestore[tree_iter][2]
-        print(f"Option 2 selected on {value}")
+        print(f"Option 1 selected on {value}")
+
+
+    def expand_specific_node(self, node_id):
+        # Find the path of the node to expand
+        iter = self.treestore.get_iter_first()
+        while iter is not None:
+            if self.treestore[iter][2] == node_id:
+                path = self.treestore.get_path(iter)
+                self.treeview.expand_row(path, True)
+            iter = self.treestore.iter_next(iter)
+
+    def refresh(self, node_to_expand=None):
+        self.update_model()
+        if node_to_expand:
+            self.expand_specific_node(node_to_expand)
 
