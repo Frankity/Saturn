@@ -15,7 +15,7 @@ class SaturApp(Gtk.Application):
 
     def on_activate(self, application):
         self.window = AppWindow(application=application)
-        self.win.show_all()
+        self.window.show_all()
 
 
 app = SaturApp(application_id="xyz.frankity.saturn")

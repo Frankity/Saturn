@@ -1,4 +1,5 @@
 import gi
+import peewee
 from peewee import JOIN
 
 from ui.dialogs.add_request_dialog import AddRequestDialog
@@ -53,18 +54,21 @@ class QueryPanel(Gtk.Box):
 
         folder_iters = {}
 
-        for row in requests:
-            folder_name = row.folders.folder_name
-            if folder_name not in folder_iters:
-                folder_iter = self.treestore.append(None, [f'<b>{folder_name}</b>', -1, row.folders.folder_id])
-                folder_iters[folder_name] = folder_iter
-            else:
-                folder_iter = folder_iters[folder_name]
+        try:
+            for row in requests:
+                folder_name = row.folders.folder_name
+                if folder_name not in folder_iters:
+                    folder_iter = self.treestore.append(None, [f'<b>{folder_name}</b>', -1, row.folders.folder_id])
+                    folder_iters[folder_name] = folder_iter
+                else:
+                    folder_iter = folder_iters[folder_name]
 
-            self.treestore.append(folder_iter,
-                                  [
-                                      f'<b><span color="{get_color_by_method(row.method)}">{get_name_by_type(row.method)}</span></b> {row.name}',
-                                      row.id, True])
+                self.treestore.append(folder_iter,
+                                      [
+                                          f'<b><span color="{get_color_by_method(row.method)}">{get_name_by_type(row.method)}</span></b> {row.name}',
+                                          row.id, True])
+        except peewee.OperationalError as e:
+            create_needed_tables()
 
     def add_request_to_list(self):
 
