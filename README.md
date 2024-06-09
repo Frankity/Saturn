@@ -26,7 +26,7 @@ Saturn is a lightweight and native REST client application designed for Linux en
 ### Instructions
 1. Clone the repository: `git clone https://github.com/Frankity/Saturn.git`
 2. Navigate to the project directory: `cd Saturn`
-3. Install dependencies: `pip install -r requirements.txt`
+3. Install dependencies: `poetry install`
 4. Run Saturn: `python main.py`
 
 ## Usage

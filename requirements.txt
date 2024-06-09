@@ -1,8 +1,0 @@
-annotated-types==0.6.0
-peewee==3.17.5
-pycairo==1.26.0
-pydantic==2.7.1
-pydantic_core==2.18.2
-PyGObject==3.48.2
-typing_extensions==4.11.0
-urllib3==2.2.1

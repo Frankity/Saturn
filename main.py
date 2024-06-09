@@ -1,26 +1,22 @@
 import sys
 import gi
 
-from ui.main_window import MyWindow
+from ui.main_window import AppWindow
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk
 
-class MyApp(Gtk.Application):
+
+class SaturApp(Gtk.Application):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.window = None
         self.connect('activate', self.on_activate)
 
-    def on_activate(self, app):
-        style_provider = Gtk.CssProvider()
-        style_provider.load_from_path("custom.css")
+    def on_activate(self, application):
+        self.window = AppWindow(application=application)
+        self.win.show_all()
 
-        screen = Gdk.Screen.get_default()
-        style_context = Gtk.StyleContext()
-        style_context.add_provider_for_screen(screen, style_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
-        self.win = MyWindow(application=app)
-        self.win.show_all()  # Gtk.Window.show_all() replaces present()
-
-app = MyApp(application_id="xyz.frankity.saturn")
+app = SaturApp(application_id="xyz.frankity.saturn")
 app.run(sys.argv)

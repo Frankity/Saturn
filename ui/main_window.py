@@ -83,7 +83,7 @@ def open_response(self, dialog, response):
         filename = file.get_path()
 
 
-class MyWindow(Gtk.Window):
+class AppWindow(Gtk.Window):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.set_default_size(1600, 1024)

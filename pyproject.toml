@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "saturn"
+version = "0.0.1"
+description = "Saturn is a lightweight and native REST client application designed for Linux environments."
+authors = ["Douglas Brunal <frankithy@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+annotated-types = "0.6.0"
+peewee = "3.17.5"
+pycairo = "1.26.0"
+pydantic = "2.7.1"
+pydantic_core = "2.18.2"
+PyGObject = "3.48.2"
+typing_extensions = "4.11.0"
+urllib3 = "2.2.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
