@@ -1,6 +1,7 @@
 import sys
 import gi
 
+import src.utils.io
 from src.ui.main_window import AppWindow
 
 gi.require_version('Gtk', '3.0')
@@ -12,6 +13,7 @@ class SaturApp(Gtk.Application):
         super().__init__(**kwargs)
         self.window = None
         self.connect('activate', self.on_activate)
+        src.utils.io.create_data_directory()
 
     def on_activate(self, application):
         self.window = AppWindow(application=application)

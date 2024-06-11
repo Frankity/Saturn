@@ -1,7 +1,9 @@
 from peewee import SqliteDatabase, Model, AutoField, IntegerField, CharField, BooleanField
 from pydantic import BaseModel, Field, HttpUrl
+from src.utils.config import DB_LOCATION
+from src.utils.io import get_user_dir
 
-database = SqliteDatabase("saturn.db")
+database = SqliteDatabase(f'{get_user_dir()}/{DB_LOCATION}')
 
 
 class Requests(Model):
@@ -70,4 +72,14 @@ class Params(Model):
 
 def create_needed_tables():
     with database as db:
-        db.create_tables([Collection, Requests, Body, Headers, Params])
+        db.create_tables(
+            [
+                Collection,
+                Requests,
+                Body,
+                Headers,
+                Params,
+                Folders
+            ]
+        )
+
