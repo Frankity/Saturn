@@ -7,9 +7,9 @@ def get_user_dir():
 
 
 def create_data_directory():
-    app_dir = f'{get_user_dir()}/{CONFIG_DIR}{APP_DIR}'
+    app_dir = os.path.join(get_user_dir(), CONFIG_DIR, APP_DIR)
     try:
         if not os.path.exists(app_dir):
-            os.mkdir(app_dir)
+            os.makedirs(app_dir)
     except Exception as e:
-        print(e)
+        print(f"Error creating directory: {e}")
