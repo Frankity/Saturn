@@ -2,11 +2,11 @@ import gi
 import peewee
 from peewee import JOIN
 
-from ui.dialogs.add_request_dialog import AddRequestDialog
-from ui.dialogs.yes_no_dialog import YesNoDialog
-from ui.widgets.query_item import QueryItem
-from utils.database import Requests, create_needed_tables, Folders, Body, Params, Headers
-from utils.misc import get_name_by_type, get_color_by_method, selected_request
+from src.ui.dialogs.add_request_dialog import AddRequestDialog
+from src.ui.dialogs.yes_no_dialog import YesNoDialog
+from src.ui.widgets.query_item import QueryItem
+from src.utils.database import Requests, create_needed_tables, Folders, Body, Params, Headers
+from src.utils.misc import get_name_by_type, get_color_by_method, selected_request
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('GtkSource', '4')

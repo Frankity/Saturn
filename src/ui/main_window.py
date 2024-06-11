@@ -1,22 +1,13 @@
 import json
 
 import gi
-import urllib3
-import time
 
-from ui.widgets.pre_request_container import PreRequestContainer
-from ui.widgets.request_container import RequestContainer
-from utils.database import database, create_needed_tables, RequestModel, Requests
+from src.ui.widgets.query_panel import QueryPanel
+from src.ui.widgets.request_container import RequestContainer
 from pydantic import ValidationError
 
-
-from ui.widgets.query_item import QueryItem
-from ui.widgets.query_panel import QueryPanel
-from ui.widgets.header_response import HeaderResponse
-from ui.widgets.header_status import HeaderStatus
-from ui.widgets.source_view import SourceView
-from utils.methods import items
-from utils.misc import get_type_by_name, get_name_by_type
+from src.ui.widgets.header_response import HeaderResponse
+from src.ui.widgets.source_view import SourceView
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('GdkPixbuf', '2.0')

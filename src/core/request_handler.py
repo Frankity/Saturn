@@ -11,10 +11,10 @@ from urllib3.exceptions import (
 )
 from gi.repository import Gtk, GtkSource
 
-from models.response_data import ResponseData
-from ui.widgets.request_headers.header_item import HeaderItem
-from utils.database import Requests
-from utils.misc import get_name_by_type
+from src.models.response_data import ResponseData
+from src.ui.widgets.request_headers.header_item import HeaderItem
+from src.utils.database import Requests
+from src.utils.misc import get_name_by_type, selected_request
 
 
 class RequestHandler:
@@ -27,8 +27,7 @@ class RequestHandler:
         self.json_lang = self.language_manager.get_language("json")
 
     def _get_request_data(self):
-        from ui.main_window import app_settings
-        selected_row_id = app_settings.get_int('selected-row')
+        selected_row_id = selected_request()
         request = Requests.select(Requests.method, Requests.url).where(Requests.id == selected_row_id).first()
         method = get_name_by_type(self.main_window_instance.request_container.notebook_content.dropdown.get_active() + 1)  # indexed
         body = self.main_window_instance.request_container.pre_request_container.sv.get_buffer().get_text(

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>xyz.frankity.satur</id>
+  <name>Saturn</name>
+  <summary>Saturn Rest Client</summary>
+  <description>
+    <p>Saturn is a lightweight and native REST client application designed for Linux environments.</p>
+  </description>
+  <developer_name>Douglas Brunal</developer_name>
+  <update_contact>frankithy@gmail.com</update_contact>
+</component>

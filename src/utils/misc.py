@@ -1,6 +1,6 @@
 import json
 
-from utils.methods import items
+from src.utils.methods import items
 
 
 def get_type_by_name(name):
@@ -40,7 +40,7 @@ def get_type_color_label(tpe):
 
 
 def selected_request():
-    from ui.main_window import app_settings
+    from src.ui.main_window import app_settings
     return app_settings.get_int('selected-row')
 
 

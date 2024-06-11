@@ -1,6 +1,6 @@
 import gi
 
-from ui.widgets.request_headers.header_item import HeaderItem
+from src.ui.widgets.request_headers.header_item import HeaderItem
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('GtkSource', '4')

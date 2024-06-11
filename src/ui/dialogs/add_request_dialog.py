@@ -1,7 +1,8 @@
 import gi
 
-from utils.database import Requests
-from utils.methods import items
+from src.utils.database import Requests
+from src.utils.methods import items
+from src.utils.misc import selected_request
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
@@ -75,8 +76,7 @@ class AddRequestDialog(Gtk.Dialog):
         self.show_all()
 
     def get_existing_request_data(self):
-        from ui.main_window import app_settings
-        selected_row_id = app_settings.get_int('selected-row')
+        selected_row_id = selected_request()
 
         req = Requests.select().where(Requests.id == int(selected_row_id)).first()
         if req is not None:
@@ -85,8 +85,7 @@ class AddRequestDialog(Gtk.Dialog):
 
     def update_request(self, widget):
 
-        from ui.main_window import app_settings
-        selected_row_id = app_settings.get_int('selected-row')
+        selected_row_id = selected_request()
 
         req = Requests.get(Requests.id == selected_row_id)
         req.name = self.entry_request_name.get_text().strip()

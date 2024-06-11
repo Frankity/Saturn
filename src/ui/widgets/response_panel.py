@@ -2,9 +2,9 @@ import json
 
 import gi
 
-from ui.widgets.header_response import HeaderResponse
-from ui.widgets.header_status import HeaderStatus
-from ui.widgets.source_view import SourceView
+from src.ui.widgets.header_response import HeaderResponse
+from src.ui.widgets.header_status import HeaderStatus
+from src.ui.widgets.source_view import SourceView
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('GtkSource', '4')

@@ -1,6 +1,6 @@
 import gi
 
-from ui.widgets.request_params.param_item import ParamItem
+from src.ui.widgets.request_params.param_item import ParamItem
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('GtkSource', '4')

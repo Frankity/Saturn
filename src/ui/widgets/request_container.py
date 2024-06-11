@@ -3,13 +3,13 @@ from urllib.parse import urlparse, parse_qs, urlencode
 
 import gi
 
-from ui.widgets.header_status import HeaderStatus
-from ui.widgets.post_response_container import PostRequestContainer
-from ui.widgets.pre_request_container import PreRequestContainer
-from ui.widgets.query_input import QueryInput
-from ui.widgets.request_headers.header_item import HeaderItem
-from ui.widgets.request_params.param_item import ParamItem
-from utils.database import Body, Requests, Headers, Params
+from src.ui.widgets.header_status import HeaderStatus
+from src.ui.widgets.post_response_container import PostRequestContainer
+from src.ui.widgets.pre_request_container import PreRequestContainer
+from src.ui.widgets.query_input import QueryInput
+from src.ui.widgets.request_headers.header_item import HeaderItem
+from src.ui.widgets.request_params.param_item import ParamItem
+from src.utils.database import Body, Requests, Headers, Params
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('GtkSource', '4')

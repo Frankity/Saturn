@@ -1,6 +1,6 @@
 import gi
 
-from utils.misc import get_name_by_type, get_type_color_label
+from src.utils.misc import get_name_by_type, get_type_color_label
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Pango

@@ -1,7 +1,7 @@
 import sys
 import gi
 
-from ui.main_window import AppWindow
+from src.ui.main_window import AppWindow
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk

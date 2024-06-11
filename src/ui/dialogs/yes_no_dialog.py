@@ -1,9 +1,7 @@
 import gi
 
 gi.require_version('Gtk', '3.0')
-gi.require_version('GtkSource', '4')
-
-from gi.repository import Gtk, Gio, Gdk
+from gi.repository import Gtk
 
 
 class YesNoDialog(Gtk.Dialog):

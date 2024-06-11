@@ -4,10 +4,10 @@ import time
 import gi
 import urllib3
 
-from core.request_handler import RequestHandler
-from utils.database import Requests, Body
-from utils.methods import items
-from utils.misc import get_name_by_type
+from src.core.request_handler import RequestHandler
+from src.utils.database import Requests, Body
+from src.utils.misc import items, selected_request
+from src.utils.misc import get_name_by_type
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('GtkSource', '4')
@@ -90,8 +90,7 @@ class QueryInput(Gtk.Box):
             self.save_button.set_sensitive(True)
 
     def update_request(self, widget):
-        from ui.main_window import app_settings
-        selected_row_id = app_settings.get_int('selected-row')
+        selected_row_id = selected_request()
 
         url = self.entry_url.get_text().strip()
         method = self.dropdown.get_active() + 1

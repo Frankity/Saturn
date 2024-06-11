@@ -1,7 +1,7 @@
 
 import gi
 
-from ui.widgets.response_panel import ResponsePanel
+from src.ui.widgets.response_panel import ResponsePanel
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('GtkSource', '4')

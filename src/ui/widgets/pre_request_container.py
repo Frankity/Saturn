@@ -1,8 +1,8 @@
 import gi
 
-from ui.widgets.request_headers.request_headers_container import RequestHeadersContainer
-from ui.widgets.request_params.request_params_container import RequestParamsContainer
-from ui.widgets.source_view import SourceView
+from src.ui.widgets.request_headers.request_headers_container import RequestHeadersContainer
+from src.ui.widgets.request_params.request_params_container import RequestParamsContainer
+from src.ui.widgets.source_view import SourceView
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('GtkSource', '4')
