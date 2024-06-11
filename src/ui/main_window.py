@@ -8,12 +8,14 @@ from pydantic import ValidationError
 
 from src.ui.widgets.header_response import HeaderResponse
 from src.ui.widgets.source_view import SourceView
+from src.utils.database import Collection
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('GdkPixbuf', '2.0')
 gi.require_version('GtkSource', '4')
 
 from gi.repository import Gtk, Pango, Gio, GLib, GtkSource, GdkPixbuf, Gdk
+from src.ui.dialogs.add_collection_dialog import AddCollectionDialog
 
 row_selected = None
 json_response = None
@@ -79,11 +81,13 @@ class AppWindow(Gtk.Window):
         super().__init__(*args, **kwargs)
         self.set_default_size(1600, 1024)
 
+        self.collections_list_store = Gtk.ListStore(str, int)
+
         # set app name
         GLib.set_application_name("Saturn")
 
         main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-        response_column = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        collection_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
 
         main_box.set_size_request(width=300, height=-1)
         main_panel = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
@@ -98,7 +102,29 @@ class AppWindow(Gtk.Window):
         self.query_panel.set_margin_start(5)
         self.query_panel.set_margin_end(5)
 
-        main_box.add(Gtk.Button(label="collection-name"))
+        self.collection_dropdown = Gtk.ComboBox()
+        self.collection_dropdown.set_hexpand(True)
+
+        self.box = Gtk.Box(spacing=0)
+        self.icon = Gtk.Image(icon_name="view-more-symbolic")
+        self.box.add(self.icon)
+        self.box.set_tooltip_text('Menu')
+        self.menu_button = Gtk.Button(child=self.box)
+        self.menu_button.connect('clicked', self.show_add_collelction_dialog)
+
+        collection_box.set_margin_top(5)
+        collection_box.set_margin_bottom(5)
+        collection_box.set_margin_start(5)
+        collection_box.set_margin_end(5)
+
+        self.collection_dropdown.connect("changed", self.on_combo_changed)
+
+        collection_box.add(self.collection_dropdown)
+        collection_box.add(self.menu_button)
+
+        collection_box.set_tooltip_text("Manage Collections")
+
+        main_box.add(collection_box)
 
         main_box.add(self.query_panel)
 
@@ -131,6 +157,43 @@ class AppWindow(Gtk.Window):
 
         self.open_dialog = Gtk.FileChooserNative.new(title="Choose a file",
                                                      parent=self, action=Gtk.FileChooserAction.OPEN)
+
+        self.get_collections()
+
+    def show_add_collelction_dialog(self, event):
+        add_collection_dialog = AddCollectionDialog(main_window_instance=self, modify=False)
+        add_collection_dialog.show()
+
+    def on_combo_changed(self, widget):
+        active_iter = widget.get_active_iter()
+        if active_iter:
+            # Get the selected text from the first column
+            active_text = widget.get_model()[active_iter][0]
+            # Get the selected integer from the second column
+            active_integer = widget.get_model()[active_iter][1]
+
+            self.query_panel.update_model()
+            print("Selected item:", active_text, active_integer)
+
+    def get_collections(self):
+        self.collections_list_store.clear()
+
+        for col in Collection.select():
+            self.collections_list_store.append([col.name, col.id])
+
+        self.collection_dropdown.set_model(self.collections_list_store)
+        renderer_text = Gtk.CellRendererText()
+        self.collection_dropdown.pack_start(renderer_text, True)
+        self.collection_dropdown.add_attribute(renderer_text, "text", 0)
+        self.collection_dropdown.set_active(0)
+
+    def refresh_collections(self):
+        self.collections_list_store.clear()
+
+        for col in Collection.select():
+            self.collections_list_store.append([col.name, col.id])
+
+        self.collection_dropdown.set_active(0)
 
     def show_about(self, action, param):
         self.about = Gtk.AboutDialog()

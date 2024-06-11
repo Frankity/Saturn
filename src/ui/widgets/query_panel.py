@@ -3,8 +3,8 @@ import peewee
 from peewee import JOIN
 
 from src.ui.dialogs.add_request_dialog import AddRequestDialog
+from src.ui.dialogs.add_folder_dialog import AddFolderDialog
 from src.ui.dialogs.yes_no_dialog import YesNoDialog
-from src.ui.widgets.query_item import QueryItem
 from src.utils.database import Requests, create_needed_tables, Folders, Body, Params, Headers
 from src.utils.misc import get_name_by_type, get_color_by_method, selected_request
 
@@ -18,6 +18,8 @@ class QueryPanel(Gtk.Box):
     def __init__(self, main_window_instance=None):
         super().__init__()
 
+        self.collection_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+
         self.treeview = Gtk.TreeView()
         self.main_window_instance = main_window_instance
         self.set_orientation(Gtk.Orientation.VERTICAL)
@@ -27,7 +29,19 @@ class QueryPanel(Gtk.Box):
         self.search_entry = Gtk.SearchEntry()
         self.search_entry.set_placeholder_text("Search request...")
         self.search_entry.connect("changed", self.on_search_activated)
-        self.add(self.search_entry)
+        self.search_entry.set_hexpand(True)
+
+        self.box = Gtk.Box(spacing=0)
+        self.icon = Gtk.Image(icon_name="list-add-symbolic")
+        self.box.add(self.icon)
+        self.box.set_tooltip_text('Add')
+        self.menu_button = Gtk.Button(child=self.box)
+        self.menu_button.connect('clicked', self.show_context_menu_over_folder)
+
+        self.collection_box.add(self.search_entry)
+        self.collection_box.add(self.menu_button)
+
+        self.add(self.collection_box)
 
         self.search_text = ""
         self.initiate = False  # check for first added
@@ -37,7 +51,7 @@ class QueryPanel(Gtk.Box):
         self.scrolled_window.set_vexpand(True)
         self.add(self.scrolled_window)
 
-        self.update_model()
+        #self.update_model()
         self.add_request_to_list()
 
     def update_model(self):
@@ -143,7 +157,7 @@ class QueryPanel(Gtk.Box):
                 else:
                     self.show_context_menu_over_request(event, tree_iter)
 
-    def show_context_menu_over_folder(self, event, tree_iter):
+    def show_context_menu_over_folder(self, event, tree_iter=None):
         menu = Gtk.Menu()
 
         menu_item_add_folder = Gtk.MenuItem()
@@ -166,12 +180,15 @@ class QueryPanel(Gtk.Box):
 
         menu.append(menu_item_add_folder)
         menu.append(menu_item_add_request)
-
-        menu_item_add_folder.connect("activate", self.on_menu_item1_activate, tree_iter)
-        menu_item_add_request.connect("activate", self.on_menu_item2_activate, tree_iter)
-
         menu.show_all()
-        menu.popup_at_pointer(event)
+
+        if tree_iter is not None:
+            menu_item_add_folder.connect("activate", self.on_menu_item1_activate, tree_iter)
+            menu_item_add_request.connect("activate", self.on_menu_item2_activate, tree_iter)
+            menu.popup_at_pointer(event)
+        else:
+            menu_item_add_folder.connect("activate", self.on_menu_item1_activate, tree_iter)
+            menu.popup_at_widget(event, Gdk.Gravity.SOUTH_EAST, Gdk.Gravity.NORTH_WEST)
 
     def show_context_menu_over_request(self, event, tree_iter):
         menu = Gtk.Menu()
@@ -203,9 +220,14 @@ class QueryPanel(Gtk.Box):
         menu.show_all()
         menu.popup_at_pointer(event)
 
-    def on_menu_item1_activate(self, widget, tree_iter):
-        value = self.treestore[tree_iter][2]
-        print(f"Option 1 selected on {value}")
+    def on_menu_item1_activate(self, widget, tree_iter=None):
+        if tree_iter is not None:
+            value = self.treestore[tree_iter][2]
+            print(f"Option 1 selected on {value}")
+        else:
+            add_folder_dialog = AddFolderDialog(folder_owner=None,
+                                                  main_window_instance=self.main_window_instance)
+            add_folder_dialog.show()
 
     def on_menu_item2_activate(self, widget, tree_iter):
         folder_id = self.treestore[tree_iter][2]

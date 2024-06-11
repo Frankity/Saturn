@@ -9,7 +9,7 @@ database = SqliteDatabase(f'{get_user_dir()}/{DB_LOCATION}')
 class Requests(Model):
     id = AutoField(primary_key=True)
     name = CharField()
-    url = CharField()
+    url = CharField(null=True)
     method = IntegerField()
     folder = CharField()
 
