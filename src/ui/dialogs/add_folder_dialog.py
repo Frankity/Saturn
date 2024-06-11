@@ -1,8 +1,7 @@
 import gi
 
 from src.utils.database import Requests, Folders
-from src.utils.methods import items
-from src.utils.misc import selected_request
+from src.utils.misc import selected_request, get_current_collection
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
@@ -82,7 +81,7 @@ class AddFolderDialog(Gtk.Dialog):
     def store_new_folder(self, widget):
         name = self.entry_folder_name.get_text().strip()
         result = (Folders
-                  .insert(name=name, environment=1)
+                  .insert(name=name, collection=get_current_collection(), environment=1)
                   .execute())
 
         self.main_window_instance.query_panel.refresh(None)

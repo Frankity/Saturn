@@ -2,6 +2,7 @@ import json
 
 import gi
 
+import src.utils.misc
 from src.ui.widgets.query_panel import QueryPanel
 from src.ui.widgets.request_container import RequestContainer
 from pydantic import ValidationError
@@ -167,13 +168,11 @@ class AppWindow(Gtk.Window):
     def on_combo_changed(self, widget):
         active_iter = widget.get_active_iter()
         if active_iter:
-            # Get the selected text from the first column
             active_text = widget.get_model()[active_iter][0]
-            # Get the selected integer from the second column
             active_integer = widget.get_model()[active_iter][1]
-
+            src.utils.misc.set_current_collection(active_integer)
             self.query_panel.update_model()
-            print("Selected item:", active_text, active_integer)
+
 
     def get_collections(self):
         self.collections_list_store.clear()

@@ -20,6 +20,7 @@ class Requests(Model):
 class Folders(Model):
     id = AutoField(primary_key=True)
     name = CharField()
+    collection = IntegerField()
     environment = IntegerField()
 
     class Meta:

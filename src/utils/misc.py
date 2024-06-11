@@ -1,6 +1,7 @@
 import json
 
 from src.utils.methods import items
+from gi.repository import Gio
 
 
 def get_type_by_name(name):
@@ -42,6 +43,16 @@ def get_type_color_label(tpe):
 def selected_request():
     from src.ui.main_window import app_settings
     return app_settings.get_int('selected-row')
+
+
+def set_current_collection(collection_id):
+    app_settings = Gio.Settings.new(schema_id='xyz.frankity.saturn')
+    app_settings.set_int('selected-collection', collection_id)
+
+
+def get_current_collection():
+    from src.ui.main_window import app_settings
+    return app_settings.get_int('selected-collection')
 
 
 class SingleQuoteEncoder(json.JSONEncoder):

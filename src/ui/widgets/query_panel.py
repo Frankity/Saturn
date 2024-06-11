@@ -1,12 +1,11 @@
 import gi
 import peewee
-from peewee import JOIN
 
 from src.ui.dialogs.add_request_dialog import AddRequestDialog
 from src.ui.dialogs.add_folder_dialog import AddFolderDialog
 from src.ui.dialogs.yes_no_dialog import YesNoDialog
 from src.utils.database import Requests, create_needed_tables, Folders, Body, Params, Headers
-from src.utils.misc import get_name_by_type, get_color_by_method, selected_request
+from src.utils.misc import get_name_by_type, get_color_by_method, selected_request, get_current_collection
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('GtkSource', '4')
@@ -51,36 +50,32 @@ class QueryPanel(Gtk.Box):
         self.scrolled_window.set_vexpand(True)
         self.add(self.scrolled_window)
 
-        #self.update_model()
         self.add_request_to_list()
 
     def update_model(self):
 
         self.treestore.clear()
 
-        requests = (Requests
-                    .select(Requests,
-                            Folders.name.alias('folder_name'),
-                            Folders.id.alias('folder_id')
-                            )
-                    .join(Folders, JOIN.LEFT_OUTER, on=(Requests.folder == Folders.id))
-                    .order_by(Folders.id))
+        folders = (Folders.select().where(Folders.collection == get_current_collection() )) # add environmet check
+        requests = (Requests.select())
 
         folder_iters = {}
 
         try:
-            for row in requests:
-                folder_name = row.folders.folder_name
+            for row in folders:
+                folder_name = row.name
                 if folder_name not in folder_iters:
-                    folder_iter = self.treestore.append(None, [f'<b>{folder_name}</b>', -1, row.folders.folder_id])
+                    folder_iter = self.treestore.append(None, [f'<b>{folder_name}</b>', -1, row.id])
                     folder_iters[folder_name] = folder_iter
                 else:
                     folder_iter = folder_iters[folder_name]
 
-                self.treestore.append(folder_iter,
+                req_filter = [reqs for reqs in requests if int(reqs.folder) == int(row.id)]
+                for req in req_filter:
+                    self.treestore.append(folder_iter,
                                       [
-                                          f'<b><span color="{get_color_by_method(row.method)}">{get_name_by_type(row.method)}</span></b> {row.name}',
-                                          row.id, True])
+                                          f'<b><span color="{get_color_by_method(req.method)}">{get_name_by_type(req.method)}</span></b> {req.name}',
+                                          req.id, True])
         except peewee.OperationalError as e:
             create_needed_tables()
 
@@ -226,7 +221,7 @@ class QueryPanel(Gtk.Box):
             print(f"Option 1 selected on {value}")
         else:
             add_folder_dialog = AddFolderDialog(folder_owner=None,
-                                                  main_window_instance=self.main_window_instance)
+                                                main_window_instance=self.main_window_instance)
             add_folder_dialog.show()
 
     def on_menu_item2_activate(self, widget, tree_iter):
@@ -249,24 +244,24 @@ class QueryPanel(Gtk.Box):
         response = dialog.run()
 
         if response == Gtk.ResponseType.OK:
-            #request
+            # request
             req = Requests.get(Requests.id == int(selected_request()))
             folder_id = req.folder
             req.delete_instance()
 
-            #body
+            # body
             e_body = (Body.select().where(Body.request == int(selected_request()))).first()
             if e_body is not None:
                 body = Body.get(Body.request == int(selected_request()))
                 body.delete_instance()
 
-            #params
+            # params
             e_params = (Params.select().where(Params.request == int(selected_request()))).first()
             if e_params is not None:
                 param = Params.get(Params.request == int(selected_request()))
                 param.delete_instance()
 
-            #headers
+            # headers
             e_headers = (Headers.select().where(Headers.request == int(selected_request()))).first()
             if e_headers is not None:
                 headers = Headers.get(Headers.request == int(selected_request()))

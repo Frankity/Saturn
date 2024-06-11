@@ -123,7 +123,6 @@ class RequestContainer(Gtk.Box):
 
         except Exception as e:
             print(e)
-            print("here")
 
     def get_headers(self, headers_data):
         for existing_header in self.pre_request_container.request_headers_container.list_box_headers.get_children():
