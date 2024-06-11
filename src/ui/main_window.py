@@ -5,17 +5,15 @@ import gi
 import src.utils.misc
 from src.ui.widgets.query_panel import QueryPanel
 from src.ui.widgets.request_container import RequestContainer
-from pydantic import ValidationError
 
 from src.ui.widgets.header_response import HeaderResponse
-from src.ui.widgets.source_view import SourceView
 from src.utils.database import Collection
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('GdkPixbuf', '2.0')
 gi.require_version('GtkSource', '4')
 
-from gi.repository import Gtk, Pango, Gio, GLib, GtkSource, GdkPixbuf, Gdk
+from gi.repository import Gtk, Gio, GLib, GtkSource
 from src.ui.dialogs.add_collection_dialog import AddCollectionDialog
 
 row_selected = None
@@ -24,47 +22,6 @@ json_response = None
 buffer = GtkSource.Buffer()
 header_response = HeaderResponse()
 app_settings = Gio.Settings.new(schema_id='xyz.frankity.saturn')
-
-
-class ProjectList(Gtk.Box):
-    def __init__(self):
-        super().__init__(orientation=Gtk.Orientation.VERTICAL)
-
-        self.listbox = Gtk.ListBox()
-        self.listbox.set_size_request(350, self.listbox.get_height())
-        for i in range(5):
-            row = Gtk.ListBoxRow()
-            hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=50)
-            label = Gtk.Label(label="Projeect " + str(i))
-            icon = Gtk.Image.new_from_icon_name("avatar-default")
-            hbox.add(icon)
-            hbox.add(label)
-            row.set_child(hbox)
-            self.listbox.add(row)
-
-        self.add(self.listbox)
-
-
-def show_overlay(data):
-    dialog = Gtk.Dialog()
-    dialog.set_title(data['title'])
-    content_box_dialog = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
-    content_box_dialog.set_margin_top(20)
-    content_box_dialog.set_margin_start(10)
-    content_box_dialog.set_margin_end(10)
-    content_box_dialog.set_margin_bottom(20)
-    for d in json.loads(data['info']):
-        content_box_dialog.add(Gtk.Label(label=d['msg']))
-
-    button = Gtk.Button(label='OK')
-    button.set_margin_start(30)
-    button.set_margin_end(30)
-    button.set_margin_top(20)
-    button.connect('clicked', lambda bt: dialog.close())
-    content_box_dialog.add(button)
-    dialog.set_child(content_box_dialog)
-    dialog.set_modal(True)
-    dialog.show()
 
 
 def show_open_dialog(self, button):
