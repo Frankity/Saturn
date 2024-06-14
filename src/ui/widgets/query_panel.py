@@ -23,7 +23,7 @@ class QueryPanel(Gtk.Box):
         self.main_window_instance = main_window_instance
         self.set_orientation(Gtk.Orientation.VERTICAL)
         self.set_spacing(5)
-        self.treestore = Gtk.TreeStore(str, int, int)  # name,request_id,folder_id
+        self.treestore = Gtk.TreeStore(str, int, int, str)  # name, request_id, folder_id, icon_name
 
         self.search_entry = Gtk.SearchEntry()
         self.search_entry.set_placeholder_text("Search request...")
@@ -44,6 +44,7 @@ class QueryPanel(Gtk.Box):
 
         self.search_text = ""
         self.initiate = False  # check for first added
+        self.folder_iter = None
 
         self.scrolled_window = Gtk.ScrolledWindow()
         self.scrolled_window.set_hexpand(True)
@@ -56,7 +57,7 @@ class QueryPanel(Gtk.Box):
 
         self.treestore.clear()
 
-        folders = (Folders.select().where(Folders.collection == get_current_collection() )) # add environmet check
+        folders = (Folders.select().where(Folders.collection == get_current_collection()))  # add environment check
         requests = (Requests.select())
 
         folder_iters = {}
@@ -65,17 +66,17 @@ class QueryPanel(Gtk.Box):
             for row in folders:
                 folder_name = row.name
                 if folder_name not in folder_iters:
-                    folder_iter = self.treestore.append(None, [f'<b>{folder_name}</b>', -1, row.id])
-                    folder_iters[folder_name] = folder_iter
+                    self.folder_iter = self.treestore.append(None, [f' <b>{folder_name}</b>', -1, row.id, "folder"
+                                                                                                          "-symbolic"])
+                    folder_iters[folder_name] = self.folder_iter
                 else:
-                    folder_iter = folder_iters[folder_name]
+                    self.folder_iter = folder_iters[folder_name]
 
                 req_filter = [reqs for reqs in requests if int(reqs.folder) == int(row.id)]
                 for req in req_filter:
-                    self.treestore.append(folder_iter,
-                                      [
-                                          f'<b><span color="{get_color_by_method(req.method)}">{get_name_by_type(req.method)}</span></b> {req.name}',
-                                          req.id, True])
+                    self.treestore.append(self.folder_iter,
+                                          [f'<b><span color="{get_color_by_method(req.method)}">{get_name_by_type(req.method)}</span></b> {req.name}',
+                                           req.id, True, None])
         except peewee.OperationalError as e:
             create_needed_tables()
 
@@ -91,14 +92,23 @@ class QueryPanel(Gtk.Box):
         selection.connect("changed", self.on_tree_selection_changed)
         self.treeview.connect("button-press-event", self.on_button_press_event)
 
-        renderer = Gtk.CellRendererText()
-        renderer.set_fixed_size(-1, 30)
+        icon_renderer = Gtk.CellRendererPixbuf()
+        text_renderer = Gtk.CellRendererText()
+        text_renderer.set_fixed_size(-1, 30)
 
-        column = Gtk.TreeViewColumn("Paths", renderer, markup=0)
+        column = Gtk.TreeViewColumn("Paths")
+        column.pack_start(icon_renderer, False)
+        column.pack_start(text_renderer, True)
+
+        column.add_attribute(icon_renderer, "icon-name", 3)
+        column.add_attribute(text_renderer, "markup", 0)
 
         if not self.initiate:
             self.treeview.append_column(column)
             self.scrolled_window.add(self.treeview)
+
+        self.treeview.connect("row-expanded", self.on_row_expanded)
+        self.treeview.connect("row-collapsed", self.on_row_collapsed)
 
         self.initiate = True
 
@@ -273,6 +283,14 @@ class QueryPanel(Gtk.Box):
             print("The Cancel button was clicked")
 
         dialog.destroy()
+
+    def on_row_expanded(self, treeview, iter, path):
+        treeiter = self.treestore.get_iter(path)
+        self.treestore.set_value(treeiter, 3, "folder-open-symbolic")
+
+    def on_row_collapsed(self, treeview, iter, path):
+        treeiter = self.treestore.get_iter(path)
+        self.treestore.set_value(treeiter, 3, "folder-symbolic")
 
     def expand_specific_node(self, node_id):
         it = self.treestore.get_iter_first()

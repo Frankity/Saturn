@@ -89,13 +89,15 @@ class AppWindow(Gtk.Window):
         self.request_container = RequestContainer(self)
         app_settings.connect("changed", self.request_container.on_setting_changed)
 
-        main_panel.pack1(main_box)
-        main_panel.pack2(self.request_container)
+        main_panel.pack1(main_box, shrink=False)
+        main_panel.pack2(self.request_container, resize=True, shrink=False)
 
         hb = Gtk.HeaderBar()
         hb.set_show_close_button(True)
         hb.props.title = "Saturn"
+
         self.set_titlebar(hb)
+
 
         self.popover = Gtk.Popover()
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
