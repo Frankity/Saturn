@@ -75,8 +75,8 @@ class QueryPanel(Gtk.Box):
                 req_filter = [reqs for reqs in requests if int(reqs.folder) == int(row.id)]
                 for req in req_filter:
                     self.treestore.append(self.folder_iter,
-                                          [f'<b><span color="{get_color_by_method(req.method)}">{get_name_by_type(req.method)}</span></b> {req.name}',
-                                           req.id, True, None])
+                                          [f'<b>  <span color="{get_color_by_method(req.method)}">{get_name_by_type(req.method)}</span></b> {req.name}',
+                                           req.id, True, 'network-transmit-symbolic'])
         except peewee.OperationalError as e:
             create_needed_tables()
 

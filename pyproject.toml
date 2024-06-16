@@ -16,6 +16,7 @@ typing_extensions = "4.11.0"
 urllib3 = "2.2.1"
 cython = "^3.0.10"
 pyinstaller = "^6.8.0"
+orjson = "^3.10.5"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

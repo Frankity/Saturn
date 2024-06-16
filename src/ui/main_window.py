@@ -94,10 +94,15 @@ class AppWindow(Gtk.Window):
 
         hb = Gtk.HeaderBar()
         hb.set_show_close_button(True)
+
+        switch = Gtk.Switch()
+        switch.connect("notify::active", self.on_switch_activated)
+        switch.set_active(False)
+        hb.pack_end(switch)
+
         hb.props.title = "Saturn"
 
         self.set_titlebar(hb)
-
 
         self.popover = Gtk.Popover()
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -119,6 +124,15 @@ class AppWindow(Gtk.Window):
                                                      parent=self, action=Gtk.FileChooserAction.OPEN)
 
         self.get_collections()
+
+    def on_switch_activated(self, switch, gparam):
+            if switch.get_active():
+                state = "on"
+                self.request_container.post_request_container.response_panel.source_view.set_wrap_mode(True)
+            else:
+                self.request_container.post_request_container.response_panel.source_view.set_wrap_mode(False)
+                state = "off"
+            print("Switch was turned", state)
 
     def show_add_collelction_dialog(self, event):
         add_collection_dialog = AddCollectionDialog(main_window_instance=self, modify=False)
