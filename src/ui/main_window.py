@@ -126,13 +126,13 @@ class AppWindow(Gtk.Window):
         self.get_collections()
 
     def on_switch_activated(self, switch, gparam):
-            if switch.get_active():
-                state = "on"
-                self.request_container.post_request_container.response_panel.source_view.set_wrap_mode(True)
-            else:
-                self.request_container.post_request_container.response_panel.source_view.set_wrap_mode(False)
-                state = "off"
-            print("Switch was turned", state)
+        if switch.get_active():
+            state = "on"
+            self.request_container.post_request_container.response_panel.source_view.set_wrap_mode(True)
+        else:
+            self.request_container.post_request_container.response_panel.source_view.set_wrap_mode(False)
+            state = "off"
+        print("Switch was turned", state)
 
     def show_add_collelction_dialog(self, event):
         add_collection_dialog = AddCollectionDialog(main_window_instance=self, modify=False)
@@ -145,7 +145,6 @@ class AppWindow(Gtk.Window):
             active_integer = widget.get_model()[active_iter][1]
             src.utils.misc.set_current_collection(active_integer)
             self.query_panel.update_model()
-
 
     def get_collections(self):
         self.collections_list_store.clear()

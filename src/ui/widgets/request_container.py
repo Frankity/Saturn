@@ -43,7 +43,8 @@ class RequestContainer(Gtk.Box):
         self.header_status = HeaderStatus(self)
 
         strings = Gtk.ListStore(str)
-        item = "Default"
+        item = "aaaaaaaaaaaaaaaDefault"
+        strings.append(["ssssss"])
         strings.append([item])
         self.env_label = Gtk.Label(label='Environment:')
         self.env_label.set_xalign(2)
@@ -72,11 +73,12 @@ class RequestContainer(Gtk.Box):
         paned.pack1(self.pre_request_container)
         paned.pack2(self.post_request_container)
 
-        self.notebook_content = QueryInput(main_window_instance)
+        self.query_input = QueryInput(main_window_instance)
 
-        self.notebook_response.append_page(self.notebook_content, Gtk.Label(label="Params"))
+        #self.notebook_response.append_page(self.query_input, Gtk.Label(label="Parxxams"))
 
-        self.add(self.notebook_response)
+        #self.add(self.notebook_response)
+        self.add(self.query_input)
         self.add(paned)
 
     def on_setting_changed(self, settings, key):
@@ -111,15 +113,13 @@ class RequestContainer(Gtk.Box):
 
             self.pre_request_container.sv.get_buffer().set_text(formatted_json)
             if request_data.url is not None:
-                self.notebook_content.entry_url.set_text(request_data.url)
+                self.query_input.entry_url.set_text(request_data.url)
             else:
-                self.notebook_content.entry_url.set_text("")
-            self.notebook_content.dropdown.set_active(request_data.method - 1)
-            self.notebook_response.set_tab_label(self.notebook_content, Gtk.Label(label=request_data.name))
-
+                self.query_input.entry_url.set_text("")
+            self.query_input.dropdown.set_active(request_data.method - 1)
             self.get_headers(headers_data)
-
             self.get_query_params(params_data, request_data)
+            self.post_request_container.response_panel.source_view.get_buffer().set_text("", 0)
 
         except Exception as e:
             print(e)
@@ -152,7 +152,7 @@ class RequestContainer(Gtk.Box):
         query_string = manual_encode(param_object)
 
         if query_string:
-            self.notebook_content.entry_url.set_text(f"{request_data.url}?{query_string}")
+            self.query_input.entry_url.set_text(f"{request_data.url}?{query_string}")
 
     def get_kv(self):
         param_list = {}
@@ -163,10 +163,10 @@ class RequestContainer(Gtk.Box):
         query_string = manual_encode(param_list)
 
         if query_string:
-            self.notebook_content.entry_url.set_text(f"{self.get_url_only()}?{query_string}")
+            self.query_input.entry_url.set_text(f"{self.get_url_only()}?{query_string}")
 
     def update_params(self, enabled: bool, param: str):
-        url = self.notebook_content.entry_url.get_text()
+        url = self.query_input.entry_url.get_text()
         parsed_url = urlparse(url)
 
         param_list = {}
@@ -186,7 +186,7 @@ class RequestContainer(Gtk.Box):
 
         modified_query_string = urlencode(query_params, doseq=True)
         modified_url = parsed_url._replace(query=modified_query_string).geturl()
-        self.notebook_content.entry_url.set_text(modified_url)
+        self.query_input.entry_url.set_text(modified_url)
 
     def get_param_value(self, param: str):
         param_object = {}
@@ -197,5 +197,5 @@ class RequestContainer(Gtk.Box):
         return param_object
 
     def get_url_only(self):
-        parsed_url = urlparse(self.notebook_content.entry_url.get_text())
+        parsed_url = urlparse(self.query_input.entry_url.get_text())
         return parsed_url.scheme + "://" + parsed_url.netloc + parsed_url.path

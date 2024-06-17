@@ -12,6 +12,7 @@ class Requests(Model):
     url = CharField(null=True)
     method = IntegerField()
     folder = CharField()
+    collection = IntegerField(null=True)
 
     class Meta:
         database = database
@@ -62,10 +63,10 @@ class Headers(Model):
 
 class Params(Model):
     id = AutoField(primary_key=True)
-    key = CharField()
-    value = CharField()
+    key = CharField(null=True)
+    value = CharField(null=True)
     request = IntegerField()
-    enabled = BooleanField()
+    enabled = BooleanField(null=True)
 
     class Meta:
         database = database

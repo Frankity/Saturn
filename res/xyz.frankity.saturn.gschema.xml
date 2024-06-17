@@ -11,5 +11,10 @@
             <summary>selected-collection</summary>
             <description>More detailed description of the example setting.</description>
         </key>
+        <key name="selected-folder" type="i">
+            <default>0</default>
+            <summary>selected-folder</summary>
+            <description>More detailed description of the example setting.</description>
+        </key>
     </schema>
 </schemalist>

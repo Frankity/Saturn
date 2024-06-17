@@ -1,4 +1,5 @@
 import json
+from urllib.parse import urlparse
 
 from src.utils.methods import items
 from gi.repository import Gio
@@ -20,9 +21,9 @@ def get_name_by_type(tpe):
 
 def get_color_by_method(tpe):
     if tpe == 1:
-        return '#007FFF'
-    elif tpe == 2:
         return '#008800'
+    elif tpe == 2:
+        return '#007FFF'
     elif tpe == 3:
         return '#FFA500'
     elif tpe == 4:
@@ -55,9 +56,23 @@ def get_current_collection():
     return app_settings.get_int('selected-collection')
 
 
+def set_current_folder(folder_id):
+    app_settings = Gio.Settings.new(schema_id='xyz.frankity.saturn')
+    app_settings.set_int('selected-folder', folder_id)
+
+
+def get_current_folder():
+    from src.ui.main_window import app_settings
+    return app_settings.get_int('selected-folder')
+
+
 class SingleQuoteEncoder(json.JSONEncoder):
     def encode_string(self, s):
         # Replace double quotes with single quotes
         return "'" + s.replace("'", "\\'") + "'"
 
 
+def get_domain_name(url):
+    parsed_url = urlparse(url)
+    domain = parsed_url.netloc
+    return domain

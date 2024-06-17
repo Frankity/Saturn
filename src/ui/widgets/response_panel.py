@@ -34,4 +34,3 @@ class ResponsePanel(Gtk.Notebook):
 
         self.append_page(sw, label1)
         self.append_page(self.header_response, Gtk.Label(label="Headers"))
-        self.append_page(Gtk.Label(label="Cookies Tab"), Gtk.Label(label="Cookies"))

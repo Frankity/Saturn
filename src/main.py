@@ -6,7 +6,9 @@ from src.utils.database import create_needed_tables
 from src.utils.io import create_data_directory
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, Gio
+
+
 
 
 class SaturApp(Gtk.Application):
@@ -14,8 +16,13 @@ class SaturApp(Gtk.Application):
         super().__init__(**kwargs)
         self.window = None
         self.connect('activate', self.on_activate)
+        self.connect("shutdown", self.close_event)
         create_data_directory()
         create_needed_tables()
+
+    def close_event(self, application):
+        app_settings = Gio.Settings.new(schema_id='xyz.frankity.saturn')
+        app_settings.set_int('selected-row', 0)
 
     def on_activate(self, application):
         self.window = AppWindow(application=application)

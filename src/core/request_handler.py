@@ -29,7 +29,7 @@ class RequestHandler:
     def _get_request_data(self):
         selected_row_id = selected_request()
         request = Requests.select(Requests.method, Requests.url).where(Requests.id == selected_row_id).first()
-        method = get_name_by_type(self.main_window_instance.request_container.notebook_content.dropdown.get_active() + 1)  # indexed
+        method = get_name_by_type(self.main_window_instance.request_container.query_input.dropdown.get_active() + 1)  # indexed
         body = self.main_window_instance.request_container.pre_request_container.sv.get_buffer().get_text(
             self.main_window_instance.request_container.pre_request_container.sv.get_buffer().get_start_iter(),
             self.main_window_instance.request_container.pre_request_container.sv.get_buffer().get_end_iter(),
@@ -73,7 +73,7 @@ class RequestHandler:
             start_time = time.time()
             resp = self.http.request(
                 method=method,
-                url=self.main_window_instance.request_container.notebook_content.entry_url.get_text(),
+                url=self.main_window_instance.request_container.query_input.entry_url.get_text(),
                 body=body if method in ["POST", "PUT", "PATCH"] else None,
                 headers=headers_dict,
             )

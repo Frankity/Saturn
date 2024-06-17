@@ -4,10 +4,10 @@ import time
 import gi
 import urllib3
 
+import src.utils.misc
 from src.core.request_handler import RequestHandler
 from src.utils.database import Requests, Body
-from src.utils.misc import items, selected_request
-from src.utils.misc import get_name_by_type
+from src.utils.misc import items, selected_request, get_domain_name
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('GtkSource', '4')
@@ -95,10 +95,18 @@ class QueryInput(Gtk.Box):
         url = self.entry_url.get_text().strip()
         method = self.dropdown.get_active() + 1
 
-        req = Requests.get(Requests.id == selected_row_id)
-        req.url = url
-        req.method = method
-        req.save()
+        if selected_row_id == 0:
+            result = (Requests
+                      .insert(name=get_domain_name(url), url=url, method=method, folder=src.utils.misc.get_current_folder())
+                      .execute())
+            self.main_window_instance.query_panel.refresh(node_to_expand=None)
+        else:
+            req = Requests.get(Requests.id == selected_row_id)
+            req.url = url
+            req.method = method
+            req.save()
+            self.main_window_instance.query_panel.refresh(selected_row_id)
+
 
         body = self.main_window_instance.request_container.pre_request_container.sv.get_buffer().get_text(
             self.main_window_instance.request_container.pre_request_container.sv.get_buffer().get_start_iter(),
