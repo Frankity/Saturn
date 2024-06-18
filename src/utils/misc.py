@@ -28,6 +28,8 @@ def get_color_by_method(tpe):
         return '#FFA500'
     elif tpe == 4:
         return '#FF0000'
+    elif tpe == 5:
+        return '#9F27B7'
 
 
 def get_type_color_label(tpe):
@@ -63,8 +65,11 @@ def set_current_folder(folder_id):
 
 def get_current_folder():
     from src.ui.main_window import app_settings
-    return app_settings.get_int('selected-folder')
-
+    try:
+        s_folder = app_settings.get_int('selected-folder')
+        return s_folder
+    except Exception as e:
+        return 0
 
 class SingleQuoteEncoder(json.JSONEncoder):
     def encode_string(self, s):

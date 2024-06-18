@@ -1,6 +1,0 @@
-[Desktop Entry]
-Name=Saturn
-Exec=python3 /app/lib/mi_proyecto/main.py
-Icon=red_saturn.png
-Type=Application
-Categories=Utility;

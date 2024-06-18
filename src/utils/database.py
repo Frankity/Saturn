@@ -18,6 +18,14 @@ class Requests(Model):
         database = database
 
 
+class Response(Model):
+    id = AutoField(primary_key=True)
+    request = IntegerField()
+    body = CharField()
+
+    class Meta:
+        database = database
+
 class Folders(Model):
     id = AutoField(primary_key=True)
     name = CharField()
@@ -72,6 +80,25 @@ class Params(Model):
         database = database
 
 
+class Environments(Model):
+    id = AutoField(primary_key=True)
+    name = CharField()
+
+    class Meta:
+        database = database
+
+
+class EnvironmentVars(Model):
+    id = AutoField(primary_key=True)
+    key = CharField()
+    initial_value = CharField()
+    final_value = CharField()
+    enabled = BooleanField()
+
+    class Meta:
+        database = database
+
+
 def create_needed_tables():
     with database as db:
         db.create_tables(
@@ -81,7 +108,10 @@ def create_needed_tables():
                 Body,
                 Headers,
                 Params,
-                Folders
+                Folders,
+                Response,
+                Environments,
+                EnvironmentVars
             ]
         )
 

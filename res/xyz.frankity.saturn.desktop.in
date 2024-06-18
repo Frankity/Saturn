@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Saturn
+Exec=/home/db/PyCharmProjects/Saturn/build/dist/saturn
+Icon=xyz.frankity.saturn
+Terminal=false
+Type=Application
+Categories=GTK;
+StartupNotify=true

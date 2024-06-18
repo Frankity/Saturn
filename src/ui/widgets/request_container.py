@@ -9,7 +9,7 @@ from src.ui.widgets.pre_request_container import PreRequestContainer
 from src.ui.widgets.query_input import QueryInput
 from src.ui.widgets.request_headers.header_item import HeaderItem
 from src.ui.widgets.request_params.param_item import ParamItem
-from src.utils.database import Body, Requests, Headers, Params
+from src.utils.database import Body, Requests, Headers, Params, Response, Environments
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('GtkSource', '4')
@@ -42,17 +42,17 @@ class RequestContainer(Gtk.Box):
 
         self.header_status = HeaderStatus(self)
 
-        strings = Gtk.ListStore(str)
-        item = "aaaaaaaaaaaaaaaDefault"
-        strings.append(["ssssss"])
-        strings.append([item])
+        envs = Gtk.ListStore(int, str)
+        for env in Environments.select():
+            envs.append([env.id, env.name])
+
         self.env_label = Gtk.Label(label='Environment:')
         self.env_label.set_xalign(2)
         self.env_label.set_hexpand(True)
-        self.combo_box_environment = Gtk.ComboBox.new_with_model(model=strings)
+        self.combo_box_environment = Gtk.ComboBox.new_with_model(model=envs)
         renderer_text = Gtk.CellRendererText()
         self.combo_box_environment.pack_start(renderer_text, True)
-        self.combo_box_environment.add_attribute(renderer_text, "text", 0)
+        self.combo_box_environment.add_attribute(renderer_text, "text", 1)
         self.combo_box_environment.set_active(0)
 
         self.combo_box_environment.set_hexpand(False)
@@ -75,9 +75,9 @@ class RequestContainer(Gtk.Box):
 
         self.query_input = QueryInput(main_window_instance)
 
-        #self.notebook_response.append_page(self.query_input, Gtk.Label(label="Parxxams"))
+        # self.notebook_response.append_page(self.query_input, Gtk.Label(label="Parxxams"))
 
-        #self.add(self.notebook_response)
+        # self.add(self.notebook_response)
         self.add(self.query_input)
         self.add(paned)
 
@@ -94,6 +94,11 @@ class RequestContainer(Gtk.Box):
                             .where(Requests.id == int(value))
                             .first())
 
+            response_data = (Response
+                             .select()
+                             .where(Response.request == int(value))
+                             .first())
+
             headers_data = (Headers
                             .select(Headers.key,
                                     Headers.value,
@@ -102,10 +107,10 @@ class RequestContainer(Gtk.Box):
 
             params_data = (Params
                            .select(
-                                Params.key,
-                                Params.value,
-                                Params.id,
-                                Params.enabled)
+                            Params.key,
+                            Params.value,
+                            Params.id,
+                            Params.enabled)
                            .where(Params.request == int(value)))
 
             parsed_json = json.loads(body_data.body if body_data is not None else "{}")
@@ -119,7 +124,11 @@ class RequestContainer(Gtk.Box):
             self.query_input.dropdown.set_active(request_data.method - 1)
             self.get_headers(headers_data)
             self.get_query_params(params_data, request_data)
-            self.post_request_container.response_panel.source_view.get_buffer().set_text("", 0)
+            if response_data is not None:
+                self.post_request_container.response_panel.source_view.get_buffer() \
+                    .set_text(response_data.body, len(response_data.body))
+            else:
+                self.post_request_container.response_panel.source_view.get_buffer().set_text("", 0)
 
         except Exception as e:
             print(e)

@@ -13,7 +13,7 @@ from gi.repository import Gtk, GtkSource
 
 from src.models.response_data import ResponseData
 from src.ui.widgets.request_headers.header_item import HeaderItem
-from src.utils.database import Requests
+from src.utils.database import Requests, Response
 from src.utils.misc import get_name_by_type, selected_request
 
 
@@ -86,6 +86,7 @@ class RequestHandler:
             parsed = json.loads(resp.data)
 
             self.list_store.clear()
+
             for header in resp.headers:
                 self.list_store.append([header, resp.headers[header]])
 
@@ -93,21 +94,33 @@ class RequestHandler:
 
             formatted_json = json.dumps(parsed, indent=8, sort_keys=True)
 
-            self.main_window_instance.request_container.post_request_container.response_panel.source_view.get_buffer().set_language(
-                self.json_lang)
+            self.main_window_instance.request_container.post_request_container.response_panel.source_view.get_buffer()\
+                .set_language(self.json_lang)
 
-            self.main_window_instance.request_container.post_request_container.response_panel.header_response.set_list_store(
-                self.list_store)
-            self.main_window_instance.request_container.post_request_container.response_panel.source_view.get_buffer().set_text(
-                formatted_json)
+            self.main_window_instance.request_container.post_request_container.response_panel.header_response\
+                .set_list_store(self.list_store)
+
+            self.main_window_instance.request_container.post_request_container.response_panel.source_view.get_buffer()\
+                .set_text(formatted_json)
+
+            stored_response = Response.select().where(Response.request == selected_request()).first()
+
+            if stored_response:
+                existent_response = Response.get(Response.request == selected_request())
+                existent_response.body = formatted_json
+                existent_response.save()
+            else:
+                Response.insert(request=selected_request(), body=formatted_json).execute()
 
         except (MaxRetryError, NewConnectionError, SSLError, TimeoutError, InvalidHeader, HTTPError) as e:
             self.main_window_instance.request_container.header_status.update_data(response_fail)
             self._handle_error(e, response_fail)
         except json.JSONDecodeError as e:
-            self.main_window_instance.request_container.post_request_container.response_panel.source_view.get_buffer().set_language(
+            self.main_window_instance.request_container.post_request_container.response_panel.source_view.get_buffer()\
+                .set_language(
                 self.html_lang)
             self.main_window_instance.request_container.header_status.update_data(response_fail)
-            self.main_window_instance.request_container.post_request_container.response_panel.source_view.get_buffer().set_text(
+            self.main_window_instance.request_container.post_request_container.response_panel.source_view.get_buffer()\
+                .set_text(
                 str(e.doc),
                 len(str(e.doc)))
