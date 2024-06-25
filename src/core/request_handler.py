@@ -109,7 +109,7 @@ class RequestHandler:
                 existent_response = Response.get(Response.request == selected_request())
                 existent_response.body = formatted_json
                 existent_response.save()
-                if Events.select().where(Events.request == selected_request()).first() > 0:
+                if Events.select().where(Events.request == selected_request()).count() > 0:
                     self.main_window_instance.request_container.pre_request_container.source_view_events.run_events()
             else:
                 Response.insert(request=selected_request(), body=formatted_json).execute()
