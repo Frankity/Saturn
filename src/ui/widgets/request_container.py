@@ -9,6 +9,7 @@ from src.ui.widgets.pre_request_container import PreRequestContainer
 from src.ui.widgets.query_input import QueryInput
 from src.ui.widgets.request_headers.header_item import HeaderItem
 from src.ui.widgets.request_params.param_item import ParamItem
+from src.ui.widgets.windows.environment_window import EnvironmentWindow
 from src.utils.database import Body, Requests, Headers, Params, Response, Environments
 
 gi.require_version('Gtk', '3.0')
@@ -55,11 +56,19 @@ class RequestContainer(Gtk.Box):
         self.combo_box_environment.add_attribute(renderer_text, "text", 1)
         self.combo_box_environment.set_active(0)
 
+        self.box = Gtk.Box(spacing=0)
+        self.icon = Gtk.Image(icon_name="emblem-system-symbolic")
+        self.box.add(self.icon)
+        self.box.set_tooltip_text('Manage Environments')
+        self.menu_button = Gtk.Button(child=self.box)
+        self.menu_button.connect('clicked', self.show_environments_dialog)
+
         self.combo_box_environment.set_hexpand(False)
 
         self.box_header_container.add(self.header_status)
         self.box_header_container.add(self.env_label)
         self.box_header_container.add(self.combo_box_environment)
+        self.box_header_container.add(self.menu_button)
 
         self.add(self.box_header_container)
 
@@ -75,9 +84,6 @@ class RequestContainer(Gtk.Box):
 
         self.query_input = QueryInput(main_window_instance)
 
-        # self.notebook_response.append_page(self.query_input, Gtk.Label(label="Parxxams"))
-
-        # self.add(self.notebook_response)
         self.add(self.query_input)
         self.add(paned)
 
@@ -208,3 +214,7 @@ class RequestContainer(Gtk.Box):
     def get_url_only(self):
         parsed_url = urlparse(self.query_input.entry_url.get_text())
         return parsed_url.scheme + "://" + parsed_url.netloc + parsed_url.path
+
+    def show_environments_dialog(self, widget):
+        environments_dialog = EnvironmentWindow(main_window_instance=self, modify=False)
+        environments_dialog.show()

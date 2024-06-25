@@ -97,7 +97,8 @@ class QueryInput(Gtk.Box):
 
         if selected_row_id == 0:
             result = (Requests
-                      .insert(name=get_domain_name(url), url=url, method=method, folder=src.utils.misc.get_current_folder())
+                      .insert(name=get_domain_name(url), url=url, method=method,
+                              folder=src.utils.misc.get_current_folder())
                       .execute())
             self.main_window_instance.query_panel.refresh(node_to_expand=None)
         else:
@@ -106,7 +107,6 @@ class QueryInput(Gtk.Box):
             req.method = method
             req.save()
             self.main_window_instance.query_panel.refresh(selected_row_id)
-
 
         body = self.main_window_instance.request_container.pre_request_container.sv.get_buffer().get_text(
             self.main_window_instance.request_container.pre_request_container.sv.get_buffer().get_start_iter(),
