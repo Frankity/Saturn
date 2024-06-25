@@ -1,7 +1,9 @@
 import json
+import traceback
 
 import gi
 from src.core.saturn_environments_events import SaturnEvents
+from src.ui.dialogs.message_dialog import MessageDialog
 
 from src.utils.database import Requests, Response
 from src.utils.misc import selected_request
@@ -13,9 +15,10 @@ from gi.repository import Gtk, GtkSource, Gio, GLib
 
 
 class SourceView(GtkSource.View):
-    def __init__(self, buffer, editable=bool, for_events=False):
+    def __init__(self, buffer, editable=bool, for_events=False, pr=None):
         super().__init__()
 
+        self.pr = pr
         self.set_buffer(buffer)
 
         self.context_menu_model = Gio.Menu.new()
@@ -77,7 +80,10 @@ class SourceView(GtkSource.View):
         self.get_buffer().set_text(formatted_json)
 
     def run_events(self):
+
+
         global json_data
+        global msg
 
         current_request = selected_request()
 
@@ -92,13 +98,26 @@ class SourceView(GtkSource.View):
         try:
             json_data = json.loads(req.body)
         except json.JSONDecodeError as e:
-            print(f"Invalid JSON: {e}")
-
+            self.show_message_dialog(e.args)
         try:
-
             saturn = SaturnEvents()
             local_vars = {"responseData": json_data, "SaturnEvents": saturn}
             exec(event_text, {}, local_vars)
         except Exception as e:
-            print(e)
+            error_traceback = traceback.format_exc()
+            print(error_traceback)
+            if len(e.args) > 1:
+                a, b = e.args
+                out = f"{a} {b}"
+                self.show_message_dialog(out)
+            else:
+                out = f"{e.args}"
+                self.show_message_dialog(out)
 
+    def show_message_dialog(self, message=None):
+
+        dialog = MessageDialog(p=self.pr, message=message)
+        response = dialog.run()
+
+        if response == Gtk.ResponseType.OK:
+            dialog.close()

@@ -7,7 +7,7 @@ from src.ui.widgets.source_view import SourceView
 gi.require_version('Gtk', '3.0')
 gi.require_version('GtkSource', '4')
 
-from gi.repository import Gtk, GtkSource
+from gi.repository import Gtk, GtkSource, Gdk
 
 
 class PreRequestContainer(Gtk.Box):
@@ -32,12 +32,27 @@ class PreRequestContainer(Gtk.Box):
         sw.set_margin_end(5)
 
         self.sv = SourceView(buffer, True)
-        self.source_view_events = SourceView(sve_buffer, True)
-        self.source_view_events.set_input_hints(hints=Gtk.InputHints.EMOJI)
+        self.source_view_events = SourceView(sve_buffer, editable=True, for_events=True, pr=parent)
+        self.sve_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+
+        self.rev_label = Gtk.Label(label="")
+
+        self.rev_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        self.rev_box.set_size_request(-1, 50)
+        self.rev_box.modify_bg(Gtk.StateFlags.NORMAL, Gdk.Color(red=65535, green=0, blue=0))
+        self.rev_box.add(self.rev_label)
+
+        self.revealer = Gtk.Revealer()
+        self.revealer.set_reveal_child(False)
+        self.revealer.add(self.rev_box)
+
+        self.sve_box.add(self.source_view_events)
+        self.sve_box.add(self.revealer)
+
         sw.add(self.sv)
 
         self.language_manager = GtkSource.LanguageManager.new()
-        self.json_lang = self.language_manager.get_language("js")
+        self.json_lang = self.language_manager.get_language("python")
         self.source_view_events.get_buffer().set_language(self.json_lang)
 
         self.request_headers_container = RequestHeadersContainer()
@@ -56,6 +71,6 @@ class PreRequestContainer(Gtk.Box):
         self.options_query.append_page(sw, Gtk.Label(label="Body"))
         self.options_query.append_page(self.scrolled_window_headers, Gtk.Label(label="Headers"))
         self.options_query.append_page(Gtk.Label(label="Auth"), Gtk.Label(label="Auth"))
-        self.options_query.append_page(self.source_view_events, Gtk.Label(label="Events"))
+        self.options_query.append_page(self.sve_box, Gtk.Label(label="Events"))
 
         self.add(self.options_query)

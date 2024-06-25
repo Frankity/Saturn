@@ -13,7 +13,7 @@ from gi.repository import Gtk, GtkSource
 
 from src.models.response_data import ResponseData
 from src.ui.widgets.request_headers.header_item import HeaderItem
-from src.utils.database import Requests, Response
+from src.utils.database import Requests, Response, Events
 from src.utils.misc import get_name_by_type, selected_request
 
 
@@ -109,13 +109,11 @@ class RequestHandler:
                 existent_response = Response.get(Response.request == selected_request())
                 existent_response.body = formatted_json
                 existent_response.save()
-                self.main_window_instance.request_container.pre_request_container.source_view_events.run_events()
+                if Events.select().where(Events.request == selected_request()).first() > 0:
+                    self.main_window_instance.request_container.pre_request_container.source_view_events.run_events()
             else:
                 Response.insert(request=selected_request(), body=formatted_json).execute()
-                self.main_window_instance.request_container.pre_request_container.source_view_events.run_events()
-
         except (MaxRetryError, NewConnectionError, SSLError, TimeoutError, InvalidHeader, HTTPError) as e:
-            self.main_window_instance.request_container.pre_request_container.source_view_events.run_events()
 
             self.main_window_instance.request_container.header_status.update_data(response_fail)
             self._handle_error(e, response_fail)

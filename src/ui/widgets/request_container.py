@@ -74,7 +74,7 @@ class RequestContainer(Gtk.Box):
 
         self.notebook_response = Gtk.Notebook()
 
-        self.pre_request_container = PreRequestContainer(self)
+        self.pre_request_container = PreRequestContainer(main_window_instance)
         self.post_request_container = PostRequestContainer()
 
         paned = Gtk.Paned()
