@@ -9,8 +9,6 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gio
 
 
-
-
 class SaturApp(Gtk.Application):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

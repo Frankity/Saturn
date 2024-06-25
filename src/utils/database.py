@@ -26,6 +26,7 @@ class Response(Model):
     class Meta:
         database = database
 
+
 class Folders(Model):
     id = AutoField(primary_key=True)
     name = CharField()
@@ -94,6 +95,16 @@ class EnvironmentVars(Model):
     initial_value = CharField()
     final_value = CharField()
     enabled = BooleanField()
+    environment = IntegerField()
+
+    class Meta:
+        database = database
+
+
+class Events(Model):
+    id = AutoField(primary_key=True)
+    request = IntegerField()
+    event = CharField()
 
     class Meta:
         database = database
@@ -110,8 +121,8 @@ def create_needed_tables():
                 Params,
                 Folders,
                 Response,
+                Events,
                 Environments,
                 EnvironmentVars
             ]
         )
-

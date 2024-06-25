@@ -10,7 +10,7 @@ from src.ui.widgets.query_input import QueryInput
 from src.ui.widgets.request_headers.header_item import HeaderItem
 from src.ui.widgets.request_params.param_item import ParamItem
 from src.ui.widgets.windows.environment_window import EnvironmentWindow
-from src.utils.database import Body, Requests, Headers, Params, Response, Environments
+from src.utils.database import Body, Requests, Headers, Params, Response, Environments, Events
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('GtkSource', '4')
@@ -119,6 +119,8 @@ class RequestContainer(Gtk.Box):
                             Params.enabled)
                            .where(Params.request == int(value)))
 
+            events_data = Events.select().where(Events.request == int(value)).first()
+
             parsed_json = json.loads(body_data.body if body_data is not None else "{}")
             formatted_json = json.dumps(parsed_json, indent=8)
 
@@ -130,11 +132,20 @@ class RequestContainer(Gtk.Box):
             self.query_input.dropdown.set_active(request_data.method - 1)
             self.get_headers(headers_data)
             self.get_query_params(params_data, request_data)
+
             if response_data is not None:
                 self.post_request_container.response_panel.source_view.get_buffer() \
                     .set_text(response_data.body, len(response_data.body))
             else:
                 self.post_request_container.response_panel.source_view.get_buffer().set_text("", 0)
+
+            if events_data is not None:
+                self.pre_request_container.source_view_events.get_buffer().set_text(
+                    events_data.event, len(events_data.event)
+                )
+            else:
+                self.pre_request_container.source_view_events.get_buffer().set_text("", 0)
+
 
         except Exception as e:
             print(e)

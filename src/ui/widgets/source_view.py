@@ -1,6 +1,10 @@
 import json
 
 import gi
+from src.core.saturn_environments_events import SaturnEvents
+
+from src.utils.database import Requests, Response
+from src.utils.misc import selected_request
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('GtkSource', '4')
@@ -9,7 +13,7 @@ from gi.repository import Gtk, GtkSource, Gio, GLib
 
 
 class SourceView(GtkSource.View):
-    def __init__(self, buffer, editable=bool):
+    def __init__(self, buffer, editable=bool, for_events=False):
         super().__init__()
 
         self.set_buffer(buffer)
@@ -21,7 +25,7 @@ class SourceView(GtkSource.View):
         # add this format menu actions
         self.context_menu_model.append_item(self.format_menu_item)
 
-        #self.set_extra_menu(self.context_menu_model)
+        # self.set_extra_menu(self.context_menu_model)
 
         self.action_group = Gio.SimpleActionGroup.new()
 
@@ -39,7 +43,7 @@ class SourceView(GtkSource.View):
         buffer.set_language(json_lang)
 
         style_scheme_manager = GtkSource.StyleSchemeManager.get_default()
-        #print(GtkSource.StyleSchemeManager.get_scheme_ids())
+        # print(GtkSource.StyleSchemeManager.get_scheme_ids())
         style_scheme = style_scheme_manager.get_scheme('saturn')
         if style_scheme:
             buffer.set_style_scheme(style_scheme)
@@ -48,8 +52,7 @@ class SourceView(GtkSource.View):
         bt.set_tooltip_text("Format Code")
         bt.set_halign(Gtk.Align.END)
         bt.connect("clicked", self.format_code)
-        #self.add_overlay(child=bt, xpos=self.get_allocated_width(), ypos=self.get_allocated_width())
-
+        # self.add_overlay(child=bt, xpos=self.get_allocated_width(), ypos=self.get_allocated_width())
 
     def on_action_activate(self, action, parameter):
         # Handle action activation here
@@ -72,4 +75,30 @@ class SourceView(GtkSource.View):
         parsed_json = json.loads(text)
         formatted_json = json.dumps(parsed_json, indent=8)
         self.get_buffer().set_text(formatted_json)
+
+    def run_events(self):
+        global json_data
+
+        current_request = selected_request()
+
+        event_text = self.get_buffer().get_text(
+            self.get_buffer().get_start_iter(),
+            self.get_buffer().get_end_iter(),
+            True
+        )
+
+        req = Response.select().where(Response.request == current_request).first()
+
+        try:
+            json_data = json.loads(req.body)
+        except json.JSONDecodeError as e:
+            print(f"Invalid JSON: {e}")
+
+        try:
+
+            saturn = SaturnEvents()
+            local_vars = {"responseData": json_data, "SaturnEvents": saturn}
+            exec(event_text, {}, local_vars)
+        except Exception as e:
+            print(e)
 

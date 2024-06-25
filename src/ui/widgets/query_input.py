@@ -6,7 +6,7 @@ import urllib3
 
 import src.utils.misc
 from src.core.request_handler import RequestHandler
-from src.utils.database import Requests, Body
+from src.utils.database import Requests, Body, Events
 from src.utils.misc import items, selected_request, get_domain_name
 
 gi.require_version('Gtk', '3.0')
@@ -20,7 +20,7 @@ class QueryInput(Gtk.Box):
         super().__init__(orientation=Gtk.Orientation.HORIZONTAL)
 
         self.main_window_instance = main_window_instance
-        request_handler = RequestHandler(main_window_instance)
+        self.request_handler = RequestHandler(main_window_instance)
 
         self.method_url_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
         self.method_url_box.set_margin_start(5)
@@ -33,7 +33,7 @@ class QueryInput(Gtk.Box):
         self.entry_url.set_margin_top(5)
         self.entry_url.set_margin_bottom(0)
         self.entry_url.connect("changed", self.manage_button)
-        self.entry_url.connect("activate", request_handler.make_request)
+        self.entry_url.connect("activate", self.request_handler.make_request)
 
         self.box = Gtk.Box(spacing=10)
         self.icon = Gtk.Image(icon_name="document-send-symbolic")
@@ -48,7 +48,7 @@ class QueryInput(Gtk.Box):
         self.send_button.set_size_request(80, 30)
         self.send_button.set_halign(Gtk.Align.CENTER)
         self.send_button.set_margin_bottom(0)
-        self.send_button.connect("clicked", request_handler.make_request)
+        self.send_button.connect("clicked", self.send_query)
 
         self.save_box = Gtk.Box()
         self.save_icon = Gtk.Image(icon_name='document-save-symbolic')
@@ -81,6 +81,11 @@ class QueryInput(Gtk.Box):
         container_box.set_margin_bottom(5)
         self.add(container_box)
 
+    def send_query(self, widget):
+        self.request_handler.make_request(widget)
+        self.update_request(widget)
+
+
     def manage_button(self, event):
         if self.entry_url.get_text() == "":
             self.send_button.set_sensitive(False)
@@ -108,6 +113,26 @@ class QueryInput(Gtk.Box):
             req.save()
             self.main_window_instance.query_panel.refresh(selected_row_id)
 
+        event = self.main_window_instance.request_container.pre_request_container.source_view_events.get_buffer().get_text(
+            self.main_window_instance.request_container.pre_request_container.source_view_events.get_buffer().get_start_iter(),
+            self.main_window_instance.request_container.pre_request_container.source_view_events.get_buffer().get_end_iter(),
+            True
+        )
+
+        req_event = (Events
+                     .select(Events.event)
+                     .where(Events.request == selected_request())
+                     .first())
+
+        if req_event is None:
+            Events.insert(event=event, request=selected_request()).execute()
+        else:
+            r_event_upd = Events.get(Events.request == selected_request())
+            r_event_upd.event = event
+            r_event_upd.save()
+
+        self.main_window_instance.query_panel.refresh()
+
         body = self.main_window_instance.request_container.pre_request_container.sv.get_buffer().get_text(
             self.main_window_instance.request_container.pre_request_container.sv.get_buffer().get_start_iter(),
             self.main_window_instance.request_container.pre_request_container.sv.get_buffer().get_end_iter(),
@@ -116,14 +141,14 @@ class QueryInput(Gtk.Box):
 
         req_body = (Body
                     .select(Body.body)
-                    .where(Body.request == int(selected_row_id))
+                    .where(Body.request == selected_request())
                     .first())
 
         if req_body is None:
-            r_body_new = (Body.insert(body=body, request=int(selected_row_id)).execute())
+            r_body_new = (Body.insert(body=body, request=selected_request()).execute())
             print(r_body_new)
         else:
-            r_body_upd = Body.get(Body.request == selected_row_id)
+            r_body_upd = Body.get(Body.request == selected_request())
             r_body_upd.body = body
             r_body_upd.save()
 

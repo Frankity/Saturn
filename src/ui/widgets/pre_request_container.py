@@ -23,6 +23,7 @@ class PreRequestContainer(Gtk.Box):
         self.scrolled_window.set_vexpand(True)
 
         buffer = GtkSource.Buffer()
+        sve_buffer = GtkSource.Buffer()
 
         sw = Gtk.ScrolledWindow()
         sw.set_margin_top(5)
@@ -31,8 +32,13 @@ class PreRequestContainer(Gtk.Box):
         sw.set_margin_end(5)
 
         self.sv = SourceView(buffer, True)
-
+        self.source_view_events = SourceView(sve_buffer, True)
+        self.source_view_events.set_input_hints(hints=Gtk.InputHints.EMOJI)
         sw.add(self.sv)
+
+        self.language_manager = GtkSource.LanguageManager.new()
+        self.json_lang = self.language_manager.get_language("js")
+        self.source_view_events.get_buffer().set_language(self.json_lang)
 
         self.request_headers_container = RequestHeadersContainer()
         self.request_params_container = RequestParamsContainer(parent)
@@ -50,6 +56,6 @@ class PreRequestContainer(Gtk.Box):
         self.options_query.append_page(sw, Gtk.Label(label="Body"))
         self.options_query.append_page(self.scrolled_window_headers, Gtk.Label(label="Headers"))
         self.options_query.append_page(Gtk.Label(label="Auth"), Gtk.Label(label="Auth"))
-        self.options_query.append_page(Gtk.Label(label="Events"), Gtk.Label(label="Events"))
+        self.options_query.append_page(self.source_view_events, Gtk.Label(label="Events"))
 
         self.add(self.options_query)
