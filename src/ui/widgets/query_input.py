@@ -111,7 +111,6 @@ class QueryInput(Gtk.Box):
             req.url = url
             req.method = method
             req.save()
-            self.main_window_instance.query_panel.refresh(selected_row_id)
 
         event = self.main_window_instance.request_container.pre_request_container.source_view_events.get_buffer().get_text(
             self.main_window_instance.request_container.pre_request_container.source_view_events.get_buffer().get_start_iter(),
@@ -131,7 +130,7 @@ class QueryInput(Gtk.Box):
             r_event_upd.event = event
             r_event_upd.save()
 
-        self.main_window_instance.query_panel.refresh()
+        #self.main_window_instance.query_panel.refresh()
 
         body = self.main_window_instance.request_container.pre_request_container.sv.get_buffer().get_text(
             self.main_window_instance.request_container.pre_request_container.sv.get_buffer().get_start_iter(),
@@ -152,4 +151,4 @@ class QueryInput(Gtk.Box):
             r_body_upd.body = body
             r_body_upd.save()
 
-        self.main_window_instance.query_panel.refresh()
+        #self.main_window_instance.query_panel.refresh()

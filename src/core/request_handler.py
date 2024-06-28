@@ -1,6 +1,7 @@
 import json
 import time
 import urllib3
+from urllib3.util.retry import Retry
 from urllib3.exceptions import (
     MaxRetryError,
     NewConnectionError,
@@ -20,7 +21,14 @@ from src.utils.misc import get_name_by_type, selected_request
 class RequestHandler:
     def __init__(self, main_window_instance=None):
         self.main_window_instance = main_window_instance
-        self.http = urllib3.PoolManager()
+
+        retry_strategy = Retry(
+            total=1,  # Máximo de 3 reintentos
+            status_forcelist=[429, 500, 502, 503, 504],
+            allowed_methods=["HEAD", "GET", "OPTIONS", "POST", "PUT", "DELETE", "PATCH"]
+        )
+        self.http = urllib3.PoolManager(retries=retry_strategy)
+        
         self.list_store = Gtk.ListStore(str, str)
         self.language_manager = GtkSource.LanguageManager.new()
         self.html_lang = self.language_manager.get_language("html")
@@ -76,6 +84,7 @@ class RequestHandler:
                 url=self.main_window_instance.request_container.query_input.entry_url.get_text(),
                 body=body if method in ["POST", "PUT", "PATCH"] else None,
                 headers=headers_dict,
+                timeout=5.0  # Añadiendo timeout de 5 segundos
             )
 
             end_time = time.time()
@@ -105,12 +114,13 @@ class RequestHandler:
 
             stored_response = Response.select().where(Response.request == selected_request()).first()
 
+            if Events.select().where(Events.request == selected_request()).count() > 0:
+                self.main_window_instance.request_container.pre_request_container.source_view_events.run_events()
+
             if stored_response:
                 existent_response = Response.get(Response.request == selected_request())
                 existent_response.body = formatted_json
                 existent_response.save()
-                if Events.select().where(Events.request == selected_request()).count() > 0:
-                    self.main_window_instance.request_container.pre_request_container.source_view_events.run_events()
             else:
                 Response.insert(request=selected_request(), body=formatted_json).execute()
         except (MaxRetryError, NewConnectionError, SSLError, TimeoutError, InvalidHeader, HTTPError) as e:
