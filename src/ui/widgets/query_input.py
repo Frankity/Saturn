@@ -6,8 +6,9 @@ import urllib3
 
 import src.utils.misc
 from src.core.request_handler import RequestHandler
-from src.utils.database import Requests, Body, Events
-from src.utils.misc import items, selected_request, get_domain_name
+from src.ui.widgets.request_headers.header_item import HeaderItem
+from src.utils.database import Requests, Body, Events, Response
+from src.utils.misc import items, selected_request, get_domain_name, get_name_by_type
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('GtkSource', '4')
@@ -37,7 +38,7 @@ class QueryInput(Gtk.Box):
 
         self.box = Gtk.Box(spacing=10)
         self.icon = Gtk.Image(icon_name="document-send-symbolic")
-        self.label = Gtk.Label("Send")
+        self.label = Gtk.Label(label="Send")
         self.box.add(self.icon)
         self.box.add(self.label)
         self.box.set_tooltip_text('Send request')
@@ -81,10 +82,10 @@ class QueryInput(Gtk.Box):
         container_box.set_margin_bottom(5)
         self.add(container_box)
 
-    def send_query(self, widget):
-        self.request_handler.make_request(widget)
-        self.update_request(widget)
-
+    async def send_query(self, widget):
+        response = await self.some_request_function()  # This should return a response object
+        await self._handle_response(response)
+        # self.update_request(widget)
 
     def manage_button(self, event):
         if self.entry_url.get_text() == "":
@@ -130,7 +131,7 @@ class QueryInput(Gtk.Box):
             r_event_upd.event = event
             r_event_upd.save()
 
-        #self.main_window_instance.query_panel.refresh()
+        # self.main_window_instance.query_panel.refresh()
 
         body = self.main_window_instance.request_container.pre_request_container.sv.get_buffer().get_text(
             self.main_window_instance.request_container.pre_request_container.sv.get_buffer().get_start_iter(),
@@ -151,4 +152,67 @@ class QueryInput(Gtk.Box):
             r_body_upd.body = body
             r_body_upd.save()
 
-        #self.main_window_instance.query_panel.refresh()
+        # self.main_window_instance.query_panel.refresh()
+
+    def _get_request_data(self):
+        selected_row_id = selected_request()
+        request = Requests.select(Requests.method, Requests.url).where(Requests.id == selected_row_id).first()
+        method = get_name_by_type(
+            self.main_window_instance.request_container.query_input.dropdown.get_active() + 1)  # indexed
+        body = self.main_window_instance.request_container.pre_request_container.sv.get_buffer().get_text(
+            self.main_window_instance.request_container.pre_request_container.sv.get_buffer().get_start_iter(),
+            self.main_window_instance.request_container.pre_request_container.sv.get_buffer().get_end_iter(),
+            True
+        )
+
+        header_items = self.main_window_instance.request_container.pre_request_container.request_headers_container \
+            .list_box_headers.get_children()
+        headers = [(h.key, h.value) for h in header_items if isinstance(h, HeaderItem)]
+        return request, method, body, headers
+
+
+    def _handle_error(self, sender, error, response_fail):
+        error_message = error.args[0] if error.args else "Unknown error"
+        print(error_message)
+        self.main_window_instance.request_container.post_request_container.response_panel.source_view.get_buffer().set_language(
+            self.html_lang)
+        self.main_window_instance.request_container.header_status.update_data(response_fail)
+        self.main_window_instance.request_container.post_request_container.response_panel.source_view.get_buffer().set_text(
+            str(error.args),
+            len(str(error.args)))
+
+    async def _handle_response(self, resp):
+        # self.list_store.clear()
+
+        response = await resp
+
+        parsed = json.loads(response.data)
+
+        for header in resp.headers:
+            self.list_store.append([header, resp.headers[header]])
+
+        self.main_window_instance.request_container.header_status.update_data(resp)
+
+        formatted_json = json.dumps(parsed, indent=8, sort_keys=True)
+
+        self.main_window_instance.request_container.post_request_container.response_panel.source_view.get_buffer() \
+            .set_language(self.json_lang)
+
+        self.main_window_instance.request_container.post_request_container.response_panel.header_response \
+            .set_list_store(self.list_store)
+
+        self.main_window_instance.request_container.post_request_container.response_panel.source_view.get_buffer() \
+            .set_text(formatted_json)
+
+        stored_response = Response.select().where(Response.request == selected_request()).first()
+
+        if Events.select().where(Events.request == selected_request()).count() > 0:
+            self.main_window_instance.request_container.pre_request_container.source_view_events.run_events()
+
+        if stored_response:
+            existent_response = Response.get(Response.request == selected_request())
+            existent_response.body = formatted_json
+            existent_response.save()
+        else:
+            Response.insert(request=selected_request(), body=formatted_json).execute()
+

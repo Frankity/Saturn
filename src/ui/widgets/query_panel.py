@@ -1,6 +1,7 @@
 import gi
 import peewee
 
+from gi.repository import GObject
 import src.utils.misc
 from src.ui.dialogs.add_request_dialog import AddRequestDialog
 from src.ui.dialogs.add_folder_dialog import AddFolderDialog
